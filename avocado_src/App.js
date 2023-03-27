@@ -42,11 +42,7 @@ export default function App() {
           name="Notifications"
           component={NotificationsScreen}
           options={{
-            header: () => <Header
-              placement="center"
-              centerComponent={<NotificationsHeader/>}
-              containerStyle={styles.header}
-            />
+            header: () => <NotificationsHeader/>
           }}
         />
         <Tab.Screen
