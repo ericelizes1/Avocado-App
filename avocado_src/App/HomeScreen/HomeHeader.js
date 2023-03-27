@@ -2,8 +2,8 @@ import { StyleSheet, View, Text, Image } from 'react-native';
 
 export default function HomeHeader() {
   return (
-    <View style={styles.container}>
-      <View style={styles.subContainer}>
+    <View style={styles.header}>
+      <View style={styles.container}>
         <Image source={require('../../assets/logo.png')} style={styles.image}/>
         <Text style={styles.text}>Home</Text>
       </View>
@@ -12,17 +12,16 @@ export default function HomeHeader() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  header: {
     backgroundColor: '#fff',
-    borderColor: '#ccc',
+    borderColor: '#f2f2f2',
     borderWidth: 1,
     justifyContent: 'flex-end',
     height: 100,
     width: '100%',
-    paddingBottom: 10,
-    paddingLeft: 10,
+    padding: 10,
   },
-  subContainer: {
+  container: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',

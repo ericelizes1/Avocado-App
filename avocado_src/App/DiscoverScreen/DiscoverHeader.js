@@ -11,30 +11,44 @@ export default function DiscoverHeader() {
   };
 
   return (
-    <View style={styles.container}>
-      <SearchBar
-        placeholder="Search"
-        onChangeText={setSearchText}
-        value={searchText}
-        onCancel={() => setSearchText('')}
-        onClear={() => setSearchText('')}
-        onSubmitEditing={handleSearch}
-        platform={Platform.OS === 'ios' ? 'ios' : 'android'}
-        cancelButtonTitle="Cancel"
-        cancelButtonProps={{ color: '#008080', width: '100%'}}
-        containerStyle={{ backgroundColor: '#fff' }}
-        inputContainerStyle={{ backgroundColor: '#f2f2f2' }}
-        inputStyle={{ fontSize: 14 }}
-      />
-      <StatusBar style="auto" />
+    <View style={styles.header}>
+        <SearchBar
+          placeholder='Search "avocado"'
+          onChangeText={setSearchText}
+          value={searchText}
+          onCancel={() => setSearchText('')}
+          onClear={() => setSearchText('')}
+          onSubmitEditing={handleSearch}
+          platform={Platform.OS === 'ios' ? 'ios' : 'android'}
+          containerStyle={styles.container}
+          inputContainerStyle={styles.inputContainer}
+          inputStyle={styles.text}
+        />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  header: {
     backgroundColor: '#fff',
+    borderColor: '#f2f2f2',
+    borderWidth: 1,
     justifyContent: 'flex-end',
+    height: 100,
+    width: '100%',
+    padding: 10,
   },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  inputContainer: {
+    backgroundColor: '#f2f2f2',
+    height: 20,
+    borderRadius: 15,
+  },
+  text: {
+    fontSize: 15,
+  }
 });

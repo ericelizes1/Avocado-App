@@ -28,19 +28,14 @@ export default function App() {
           name="Home"
           component={HomeScreen}
           options={{
-            header: () => 
-              <HomeHeader/>
+            header: () => <HomeHeader/>
           }}
         />
         <Tab.Screen
           name="Discover"
           component={DiscoverScreen}
           options={{
-            header: () => <Header
-              placement="center"
-              centerComponent={<DiscoverHeader/>}
-              containerStyle={styles.header}
-            />
+            header: () => <DiscoverHeader/>
           }}
         />
         <Tab.Screen
