@@ -23,26 +23,51 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator>
+      <Tab.Navigator
+        tabBarOptions={{
+          showLabel: false,
+        }}
+      >
         <Tab.Screen
           name="Home"
           component={HomeScreen}
           options={{
-            header: () => <HomeHeader/>
+            header: () => <HomeHeader/>,
+            tabBarIcon: ({ focused }) => {
+              return focused ? (
+                <MaterialCommunityIcons name="home" color='black' size={30} />
+              ) : (
+                <MaterialCommunityIcons name="home-outline" color='black' size={30} />
+              );
+            },
           }}
         />
         <Tab.Screen
           name="Discover"
           component={DiscoverScreen}
           options={{
-            header: () => <DiscoverHeader/>
+            header: () => <DiscoverHeader/>,
+            tabBarIcon: ({ focused }) => {
+              return focused ? (
+                <MaterialCommunityIcons name="compass" color='black' size={30} />
+              ) : (
+                <MaterialCommunityIcons name="compass-outline" color='black' size={30} />
+              );
+            },
           }}
         />
         <Tab.Screen
           name="Notifications"
           component={NotificationsScreen}
           options={{
-            header: () => <NotificationsHeader/>
+            header: () => <NotificationsHeader/>,
+            tabBarIcon: ({ focused }) => {
+              return focused ? (
+                <MaterialCommunityIcons name="bell" color='black' size={30} />
+              ) : (
+                <MaterialCommunityIcons name="bell-outline" color='black' size={30} />
+              );
+            },
           }}
         />
         <Tab.Screen
@@ -53,7 +78,14 @@ export default function App() {
               placement="center"
               centerComponent={<ProfileHeader/>}
               containerStyle={styles.header}
-            />
+            />,
+            tabBarIcon: ({ focused }) => {
+              return focused ? (
+                <MaterialCommunityIcons name="account" color='black' size={30} />
+              ) : (
+                <MaterialCommunityIcons name="account-outline" color='black' size={30} />
+              );
+            },
           }}
         />
       </Tab.Navigator>
@@ -73,5 +105,5 @@ const styles = StyleSheet.create({
     height: 100, 
     alignContent: 'center', 
     width: '100%'
-  }
+  },
 });
