@@ -7,16 +7,16 @@ import { Header, SearchBar } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // Screens
-import HomeScreen from './App/HomeScreen';
-import DiscoverScreen from './App/DiscoverScreen';
-import NotificationsScreen from './App/NotificationsScreen';
-import ProfileScreen from './App/ProfileScreen';
+import HomeScreen from './App/BottomTabNavigator/HomeScreen';
+import DiscoverScreen from './App/BottomTabNavigator/DiscoverScreen';
+import NotificationsScreen from './App/BottomTabNavigator/NotificationsScreen';
+import ProfileScreen from './App/BottomTabNavigator/ProfileScreen';
 
 //Headers
-import HomeHeader from './App/HomeScreen/HomeHeader';
-import DiscoverHeader from './App/DiscoverScreen/DiscoverHeader';
-import NotificationsHeader from './App/NotificationsScreen/NotificationsHeader';
-import ProfileHeader from './App/ProfileScreen/ProfileHeader';
+import HomeHeader from './App/BottomTabNavigator/HomeScreen/HomeHeader';
+import DiscoverHeader from './App/BottomTabNavigator/DiscoverScreen/DiscoverHeader';
+import NotificationsHeader from './App/BottomTabNavigator/NotificationsScreen/NotificationsHeader';
+import ProfileHeader from './App/BottomTabNavigator/ProfileScreen/ProfileHeader';
 
 const Tab = createBottomTabNavigator();
 

@@ -70,28 +70,28 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
-container: {
-flex: 1,
-backgroundColor: '#fff',
-},
-menu: {
-position: 'absolute',
-top: 0,
-left: 0,
-right: 0,
-height: 50,
-zIndex: 1,
-},
-content: {
-padding: 16,
-},
-heading: {
-fontSize: 24,
-fontWeight: 'bold',
-marginBottom: 16,
-},
-paragraph: {
-fontSize: 16,
-marginBottom: 16,
-},
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  menu: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 50,
+    zIndex: 1,
+  },
+  content: {
+    padding: 16,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  paragraph: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
 });

@@ -4,7 +4,7 @@ export default function HomeHeader() {
   return (
     <View style={styles.header}>
       <View style={styles.container}>
-        <Image source={require('../../assets/logo.png')} style={styles.image}/>
+        <Image source={require('../../../assets/logo.png')} style={styles.image}/>
         <Text style={styles.text}>Home</Text>
       </View>
     </View>
