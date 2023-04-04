@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
-import { Header } from 'react-native-elements';
 import ReviewCard from '../components/ReviewCard';
 
 export default function DiscoverScreen() {

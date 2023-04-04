@@ -3,6 +3,7 @@ import { StatusBar, } from 'expo-status-bar';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import * as Haptics from 'expo-haptics';
 
 
 export default function ReviewCard() {
@@ -10,6 +11,7 @@ export default function ReviewCard() {
 
   const handleLike = () => {
     setIsLiked(!isLiked);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   // create an array of stars based on the number of stars you want to display
