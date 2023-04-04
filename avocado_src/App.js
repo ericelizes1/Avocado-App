@@ -24,9 +24,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        tabBarOptions={{
-          showLabel: false,
-        }}
+          tabBarOptions={{
+            showLabel: false,
+          }}
       >
         <Tab.Screen
           name="Home"

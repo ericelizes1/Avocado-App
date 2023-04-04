@@ -1,72 +1,47 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Animated } from 'react-native';
-import { Header, SearchBar } from 'react-native-elements';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { Header } from 'react-native-elements';
+import ReviewCard from '../components/ReviewCard';
 
 export default function DiscoverScreen() {
-  const [menuVisible, setMenuVisible] = useState(true);
-  const scrollOffset = new Animated.Value(0);
 
-  const handleScroll = (event) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    if (offsetY > 50 && menuVisible) {
-      setMenuVisible(false);
-    } else if (offsetY <= 50 && !menuVisible) {
-      setMenuVisible(true);
-    }
-    scrollOffset.setValue(offsetY);
-  };
+  const data = [
+    { id: '1', title: 'Review 1', description: 'This is review 1' },
+    { id: '2', title: 'Review 2', description: 'This is review 2' },
+    { id: '3', title: 'Review 3', description: 'This is review 3' },
+    { id: '4', title: 'Review 4', description: 'This is review 4' },
+    { id: '5', title: 'Review 5', description: 'This is review 5' },
+    { id: '6', title: 'Review 6', description: 'This is review 6' },
+    { id: '7', title: 'Review 7', description: 'This is review 7' },
+    { id: '8', title: 'Review 8', description: 'This is review 8' },
+    { id: '9', title: 'Review 9', description: 'This is review 9' },
+    { id: '10', title: 'Review 10', description: 'This is review 10' },
+  ];
 
+  const renderItem = ({ item }) => <ReviewCard review={item} />;
+  
   return (
     <View style={styles.container}>
-      <View style={[styles.menu, { opacity: menuVisible ? 1 : 0 }]}>
-        <Header
-          centerComponent={{ text: 'Menu', style: { color: '#fff' } }}
-          backgroundColor="blue"
-        />
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.menuButton}>
+          <Text style={styles.menuText}>Filter</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuButton}>
+          <Text style={styles.menuText}>Sort</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuButton}>
+          <Text style={styles.menuText}>Location</Text>
+        </TouchableOpacity>
       </View>
-      <ScrollView
-        style={{ flex: 1 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollOffset } } }],
-          { useNativeDriver: false, listener: handleScroll }
-        )}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.content}>
-          <Text style={styles.heading}>Discover Screen</Text>
-          <Text style={styles.paragraph}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vel ex
-            eget tellus imperdiet vestibulum ac vitae sapien. Duis malesuada
-            eleifend lorem, a bibendum nibh tincidunt ac. Nullam tincidunt ante
-            vel elit volutpat, non maximus ex semper. Donec non suscipit
-            mauris. Morbi nec malesuada eros. Praesent eget enim felis. Donec
-            gravida quam vel ipsum bibendum eleifend. Sed lacinia efficitur
-            dolor, vel ultrices quam suscipit a.
-          </Text>
-          <Text style={styles.paragraph}>
-            Maecenas vel efficitur turpis. Integer maximus finibus convallis.
-            Integer auctor tincidunt libero, non aliquam nulla euismod sed.
-            Nullam facilisis, leo nec dignissim tincidunt, sapien ex viverra
-            mauris, quis mollis ex velit ut velit. Maecenas efficitur odio nec
-            elit malesuada, eu semper justo aliquet. Donec a diam ut diam
-            faucibus ultrices.
-          </Text>
-          <Text style={styles.paragraph}>
-            Aenean dictum, ipsum vel bibendum elementum, lorem enim facilisis
-            nunc, in dapibus tellus odio vitae felis. Sed bibendum sem a nulla
-            tincidunt, eget volutpat risus lobortis. Vestibulum ante ipsum
-            primis in faucibus orci luctus et ultrices posuere cubilia Curae;
-            Vivamus in ullamcorper orci, sit amet rutrum odio. Ut interdum
-            risus et        congue. Nunc malesuada sapien vel ex tristique, a malesuada nibh
-        tincidunt. Sed pharetra ante ac varius ullamcorper. Nam vel
-        pellentesque lacus. Quisque non ligula vel nisi volutpat auctor vel
-        in est. In lobortis enim et nisl bibendum, sit amet bibendum felis
-        blandit.
-      </Text>
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        style={{ width: '100%' }}
+      />
     </View>
-  </ScrollView>
-</View>
-);
+  );
 }
 
 const styles = StyleSheet.create({
@@ -74,24 +49,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  menu: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+  header: {
     height: 50,
-    zIndex: 1,
+    backgroundColor: '#EBEBEB',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
-  content: {
-    padding: 16,
+  menuButton: {
+    backgroundColor: '#fff',
+    borderRadius: 30,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
   },
-  heading: {
-    fontSize: 24,
+  menuText: {
+    fontSize: 17,
     fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  paragraph: {
-    fontSize: 16,
-    marginBottom: 16,
-  },
+    color: '#727272'
+  }
 });
