@@ -4,11 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 
 export default function ProfileScreen() {
   const username = 'Username';
+  const displayName = 'Display Name';
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.username}>{username}</Text>
+        <Text style={styles.displayName}>{displayName}</Text>
       </View>
       <View style={styles.bioContainer}>
         <Text style={styles.bioHeader}>Bio</Text>
@@ -37,14 +38,16 @@ const styles = StyleSheet.create({
     left: 0,
     padding: 10,
   },
-  username: {
+  displayName: {
     fontSize: 20,
     fontWeight: 'bold',
   },
   bioContainer: {
-    marginTop: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'absolute',
+    top: 150,
+    left: 0,
+    padding: 10,
+    width: '100%',
   },
   bioHeader: {
     fontSize: 20,
