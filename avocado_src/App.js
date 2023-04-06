@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; 
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Header, SearchBar } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -17,58 +18,16 @@ import HomeHeader from './App/HomeScreen/HomeHeader';
 import DiscoverHeader from './App/DiscoverScreen/DiscoverHeader';
 import NotificationsHeader from './App/NotificationsScreen/NotificationsHeader';
 import ProfileHeader from './App/ProfileScreen/ProfileHeader';
+import LoginScreen from './App/LoginScreen';
 
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator>
-        <Tab.Screen
-          name="Login"
-          component={HomeScreen}
-          options={{
-            header: () => <Header
-              placement="center"
-              centerComponent={<HomeHeader/>}
-              containerStyle={styles.header}
-            />
-          }}
-        />
-        <Tab.Screen
-          name="Discover"
-          component={DiscoverScreen}
-          options={{
-            header: () => <Header
-              placement="center"
-              centerComponent={<DiscoverHeader/>}
-              containerStyle={styles.header}
-            />
-          }}
-        />
-        <Tab.Screen
-          name="Notifications"
-          component={NotificationsScreen}
-          options={{
-            header: () => <Header
-              placement="center"
-              centerComponent={<NotificationsHeader/>}
-              containerStyle={styles.header}
-            />
-          }}
-        />
-        <Tab.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{
-            header: () => <Header
-              placement="center"
-              centerComponent={<ProfileHeader/>}
-              containerStyle={styles.header}
-            />
-          }}
-        />
-      </Tab.Navigator>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={LoginScreen} options={{ header: () => <HomeHeader /> }} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
