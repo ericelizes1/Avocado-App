@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 export default function ProfileScreen() {
@@ -20,7 +20,6 @@ export default function ProfileScreen() {
           numberOfLines={4}
         />
       </View>
-      <View style={styles.circle}></View>
       <StatusBar style="auto" />
     </View>
   );
@@ -62,13 +61,5 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderRadius: 10,
     padding: 10,
-  },
-  circle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: 'black',
-    marginTop: 50,
   },
 });
