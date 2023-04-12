@@ -1,31 +1,65 @@
-import React, { useState } from 'react'
-import { KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { auth } from '../firebase';
+import React, { useEffect, useState } from 'react'
+import { useNavigation } from '@react-navigation/core'
+import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View } from 'react-native'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../firebase'
 
 const LoginScreen = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPasasword] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [fetching, setFetching] = useState(false);
+    const [error, setError] = useState("");
+    const [isValid, setValid] = useState(true);
+
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        const unsub = auth.onAuthStateChanged(user => {
+                if(user) {
+                    navigation.replace("Main");
+                }
+            })
+    
+            return unsub;
+        }, [])
 
     const handleSignUp = () => {
-        auth.createUserWithEmailAndPassword(email, password)
+        if (!email || !password) {
+            alert("Please enter your email and password");
+            return;
+        }
+        createUserWithEmailAndPassword(auth, email, password)
         .then(userCredentials => {
             const user = userCredentials.user;
             console.log(user.email);
         }) 
-        .catch(error => alert(error.message))
+        .catch(error => alert(error.message)) 
     }
+
+    const handleLogin = () => {
+        signInWithEmailAndPassword(auth, email, password)
+        .then(userCredentials => {
+            const user = userCredentials.user;
+            alert(user.email);
+        }).catch(alert("Invalid email or password"))
+    } 
+
     return (
-        <KeyboardAvoidingView
+        <View
             style={styles.container}
             behavior="padding"
-        >
+        >   
+            <Image
+            source={require("../assets/logo.png")}
+            style={{width: 100, height: 100, marginBottom: 50}}
+            resizeMode="contain"/>
             <View style={styles.inputContainer}>
                 <TextInput placeholder="Email"
                 value={email}
                 onChangeText={text => setEmail(text)}
                 style={styles.input}
                 />
-                <TextInput placeholder="Email"
+                <TextInput placeholder="Password"
                 value={password}
                 onChangeText={text => setPassword(text)}
                 style={styles.input}
@@ -35,7 +69,7 @@ const LoginScreen = () => {
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity 
-                onPress={() => { }}
+                onPress={handleLogin}
                 style={styles.button}>
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
@@ -46,7 +80,7 @@ const LoginScreen = () => {
                     <Text style={styles.buttonOutlineText}>Register</Text>
                 </TouchableOpacity>
             </View>
-        </KeyboardAvoidingView>
+        </View>
     )
 }
 
@@ -75,7 +109,7 @@ buttonContainer: {
     marginTop: 40,
 },
 button: {
-    backgroundColor: '#0782F9',
+    backgroundColor: '#154c05',
     width: '100%',
     padding: 15,
     borderRadius: 10,
@@ -84,7 +118,7 @@ button: {
 buttonOutline: {
     backgroundColor: 'white',
     marginTop: 5,
-    borderColor: '#0782F9',
+    borderColor: '#154c05',
     borderWidth: 2,
 },
 buttonText: {
@@ -93,7 +127,7 @@ buttonText: {
     fontSize: 16,
 },
 buttonOutlineText: {
-    color: '#0782F9',
+    color: '#154c05',
     fontWeight: '700',
     fontSize: 16,
 
