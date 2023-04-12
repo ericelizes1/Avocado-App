@@ -3,10 +3,13 @@ import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'reac
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
 import { auth } from '../firebase';
+import { db } from '../firebase';
+
+import { profileBackend } from './ProfileScreen/ProfileBackend';
 
 export default function ProfileScreen() {
   const username = 'Username';
-  const displayName = 'Display Name';
+  const displayName = 'Personal Information';
   const navigation = useNavigation();
 
   const handleSignOut = () => {
@@ -21,6 +24,7 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.displayName}>{displayName}</Text>
+        <Text>Name: incomplete </Text>
         <Text>Email: {auth.currentUser?.email}</Text>
       </View>
       <View style={styles.bioContainer}>

@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore'
+import { getDocs, getFirestore } from 'firebase/firestore'
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -23,3 +23,32 @@ const app = initializeApp(firebaseConfig);
 // Initialize services
 const db = getFirestore(app);
 export  const auth = getAuth(app);
+
+/*
+//collection references
+const usersCollection = db.collection('users');
+
+//get collection data
+const getUserInfo = document.querySelector('.getInfo') 
+  getUserInfo.getDocs(usersCollection).then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+        console.log(doc.data());
+    }).catch((error) => {
+        console.log("Error getting users: ", error);
+    });
+})
+
+//adding stuff to the database
+const addUsers = async (name, email, password) => {
+    await usersCollection.add({
+        name,
+        email,
+        password
+    });
+}
+
+//delete stuff from the database
+const deleteUsers = async (id) => {
+    await usersCollection.doc(id).delete();
+}
+*/
