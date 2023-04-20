@@ -6,13 +6,17 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'; 
 import { Header, SearchBar } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { CardStyleInterpolators, TransitionSpecs } from '@react-navigation/stack';
 
 // Screens
 import HomeScreen from './App/BottomTabNavigator/HomeScreen';
 import DiscoverScreen from './App/BottomTabNavigator/DiscoverScreen';
 import NotificationsScreen from './App/BottomTabNavigator/NotificationsScreen';
-import ProfileScreen from './App/ProfileScreen';
+import ProfileScreen from './App/BottomTabNavigator/ProfileScreen';
 import LoginScreen from './App/LoginScreen';
+
+// Components
+import AddReviewScreen from './App/BottomTabNavigator/AddReviewScreen';
 
 
 //Headers
@@ -28,9 +32,45 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        screenOptions={{ headerShown: false }}>
+        screenOptions={{
+          headerShown: false,
+          animationTypeForReplace: 'pop',
+          gestureDirection: 'vertical',
+          gestureEnabled: true,
+          cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
+        }}
+      >
         <Stack.Screen name="Login" component={LoginScreen}/>
         <Stack.Screen name="Main" component={MainScreen}/>
+        <Stack.Screen
+          name="AddReview"
+          component={AddReviewScreen}
+          options={{
+            headerShown: false,
+            cardStyleInterpolator: ({ current }) => ({
+              cardStyle: {
+                transform: [
+                  {
+                    translateY: current.progress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [600, 0],
+                    }),
+                  },
+                ],
+              },
+              overlayStyle: {
+                opacity: current.progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.5],
+                }),
+              },
+            }),
+            transitionSpec: {
+              open: TransitionSpecs.TransitionIOSSpec,
+              close: TransitionSpecs.TransitionIOSSpec,
+            },
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

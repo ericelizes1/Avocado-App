@@ -1,5 +1,6 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
+import NewPostButton from '../components/NewPostButton';
 
 export default function HomeScreen() {
   const data = [
@@ -19,6 +20,7 @@ export default function HomeScreen() {
     <ReviewCard/>
   );
 
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -28,6 +30,9 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         style={{width: '100%'}}
       />
+      <View style={styles.floatingButtonContainer}>
+        <NewPostButton/>
+      </View>
     </View>
   );
 }
@@ -39,4 +44,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  floatingButtonContainer: {
+    position: 'absolute',
+    width: '100%',
+    bottom: 0,
+    center: 0,
+  },
 });
+

@@ -2,10 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
-import { auth } from '../firebase';
-import { db } from '../firebase';
+import { auth } from '../../firebase';
+import { db } from '../../firebase';
 
 import { profileBackend } from './ProfileScreen/ProfileBackend';
+import NewPostButton from '../components/NewPostButton';
 
 export default function ProfileScreen() {
   const username = 'Username';
@@ -41,6 +42,9 @@ export default function ProfileScreen() {
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>
       <StatusBar style="auto" />
+      <View style={styles.floatingButtonContainer}>
+        <NewPostButton/>
+      </View>
     </View>
   );
 }
@@ -103,5 +107,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight:'700',
     fontSize: 16,
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    padding: 10,
   },
 });

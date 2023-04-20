@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
+import NewPostButton from '../components/NewPostButton';
 
 export default function DiscoverScreen() {
 
@@ -28,9 +29,6 @@ export default function DiscoverScreen() {
         <TouchableOpacity style={styles.menuButton}>
           <Text style={styles.menuText}>Sort</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuButton}>
-          <Text style={styles.menuText}>Location</Text>
-        </TouchableOpacity>
       </View>
       <FlatList
         data={data}
@@ -39,6 +37,9 @@ export default function DiscoverScreen() {
         showsVerticalScrollIndicator={false}
         style={{ width: '100%' }}
       />
+      <View style={styles.floatingButtonContainer}>
+        <NewPostButton/>
+      </View>
     </View>
   );
 }
@@ -59,12 +60,18 @@ const styles = StyleSheet.create({
   menuButton: {
     backgroundColor: '#fff',
     borderRadius: 30,
-    paddingHorizontal: 20,
+    paddingHorizontal: 60,
     paddingVertical: 5,
   },
   menuText: {
     fontSize: 17,
     fontWeight: 'bold',
     color: '#727272'
-  }
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    width: '100%',
+    bottom: 0,
+    center: 0,
+  },
 });
