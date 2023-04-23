@@ -6,6 +6,7 @@ import Autocomplete from 'react-native-autocomplete-input';
 
 export default function AddReviewScreen() {
   const navigation = useNavigation();
+  const [rating, setRating] = useState(1);
   const [dish, setDish] = useState('');
   const [restaurant, setRestaurant] = useState('');
 
@@ -63,20 +64,53 @@ export default function AddReviewScreen() {
           multiline={true}
           numberOfLines={4}
         />
+        <Text>
+          
+        </Text>
         <View style={styles.ratingContainer}>
-          <Text>Rating:</Text>
-          {[1, 2, 3, 4, 5].map((rating) => (
-            <TouchableOpacity key={rating}>
-              <Ionicons
-                name="star"
-                size={24}
-                color={rating <= 3 ? '#ccc' : '#ffcc00'}
-              />
-            </TouchableOpacity>
-          ))}
+          <TouchableOpacity onPress={() => rating == 1 ? setRating(0) : setRating(1)}>
+            <Ionicons
+              name="md-star"
+              size={22}
+              color={rating < 1 ? "#ccc" : "#EDB900"}
+              paddingLeft={2}
+            />          
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => rating == 2 ? setRating(1) : setRating(2)}>
+            <Ionicons
+              name="md-star"
+              size={22}
+              color={rating < 2 ? "#ccc" : "#EDB900"}
+              paddingLeft={2}
+            />          
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => rating == 3 ? setRating(2) : setRating(3)}>
+            <Ionicons
+              name="md-star"
+              size={22}
+              color={rating < 3 ? "#ccc" : "#EDB900"}
+              paddingLeft={2}
+            />          
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => rating == 4 ? setRating(3) : setRating(4)}>
+            <Ionicons
+              name="md-star"
+              size={22}
+              color={rating < 4 ? "#ccc" : "#EDB900"}
+              paddingLeft={2}
+            />          
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => rating == 5 ? setRating(4) : setRating(5)}>
+            <Ionicons
+              name="md-star"
+              size={22}
+              color={rating < 5 ? "#ccc" : "#EDB900"}
+              paddingLeft={2}
+            />          
+          </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.addButton}>
-          <Text style={styles.buttonText}>Add Review</Text>
+          <Text style={styles.buttonText}>Create Review</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -128,5 +162,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
