@@ -5,7 +5,7 @@ import NewPostButton from '../components/NewPostButton';
 export default function NotificationsScreen() {
   return (
     <View style={styles.container}>
-      <Text>Notifications Screen</Text>
+      <Text>No new notifications</Text>
       <StatusBar style="auto" />
       <View style={styles.floatingButtonContainer}>
         <NewPostButton/>

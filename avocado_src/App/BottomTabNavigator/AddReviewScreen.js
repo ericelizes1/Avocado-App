@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Autocomplete from 'react-native-autocomplete-input';
 
 export default function AddReviewScreen() {
   const navigation = useNavigation();
+  const [dish, setDish] = useState('');
+  const [restaurant, setRestaurant] = useState('');
 
   const handleGoBack = () => {
     navigation.goBack();
+  };
+
+  const onDishSelected = (selectedDish) => {
+    setDish(selectedDish);
+  };
+
+  const onRestaurantSelected = (selectedRestaurant) => {
+    setRestaurant(selectedRestaurant);
   };
 
   return (
@@ -22,17 +33,48 @@ export default function AddReviewScreen() {
         <View style={{ flex: 1 }} />
       </View>
       <ScrollView height='100%' width='100%' padding={15}>
-        <Text>Scroll me</Text>
-        <TextInput
+        <Autocomplete
           style={styles.input}
-          placeholder="Title"
+          data={['Pizza', 'Burger', 'Pasta', 'Salad']}
+          value={dish}
+          placeholder="Dish"
+          onChangeText={setDish}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => onDishSelected(item)}>
+              <Text>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
+        <Autocomplete
+          style={styles.input}
+          data={['McDonalds', 'KFC', 'Burger King', 'Pizza Hut']}
+          value={restaurant}
+          placeholder="Restaurant"
+          onChangeText={setRestaurant}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => onRestaurantSelected(item)}>
+              <Text>{item}</Text>
+            </TouchableOpacity>
+          )}
         />
         <TextInput
           style={[styles.input, styles.descriptionInput]}
-          placeholder="Description"
+          placeholder="Review"
           multiline={true}
           numberOfLines={4}
         />
+        <View style={styles.ratingContainer}>
+          <Text>Rating:</Text>
+          {[1, 2, 3, 4, 5].map((rating) => (
+            <TouchableOpacity key={rating}>
+              <Ionicons
+                name="star"
+                size={24}
+                color={rating <= 3 ? '#ccc' : '#ffcc00'}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
         <TouchableOpacity style={styles.addButton}>
           <Text style={styles.buttonText}>Add Review</Text>
         </TouchableOpacity>
