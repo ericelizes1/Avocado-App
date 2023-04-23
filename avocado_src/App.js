@@ -129,11 +129,7 @@ function MainScreen() {
           name="Profile"
           component={ProfileScreen}
           options={{
-            header: () => <Header
-              placement="center"
-              centerComponent={<ProfileHeader/>}
-              containerStyle={styles.header}
-            />,
+            header: () => <ProfileHeader/>,
             tabBarIcon: ({ focused }) => {
               return focused ? (
                 <MaterialCommunityIcons name="account" color='black' size={30} />
