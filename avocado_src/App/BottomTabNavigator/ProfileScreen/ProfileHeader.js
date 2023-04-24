@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { auth, db } from '../../../firebase';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeHeader() {
   const [username, setUsername] = useState("username");
+  const navigation = useNavigation();
+  
+  const handleSignOut = () => {
+    auth.signOut()
+    .then(() => {
+      navigation.replace("Login");
+    })
+    .catch((error) => alert(error.message)); 
+  }
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -28,6 +38,11 @@ export default function HomeHeader() {
     <View style={styles.header}>
       <View style={styles.container}>
         <Text style={styles.text}>@{username}</Text>
+        <TouchableOpacity
+          onPress={handleSignOut}
+        >
+          <Text>Sign Out</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -46,7 +61,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
   },
   text: {
     fontSize: 25,
