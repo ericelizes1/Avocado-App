@@ -17,7 +17,7 @@ export default function ProfileScreen() {
   const [profileImagePath, setProfileImagePath] = useState(require('../components/ReviewCard/guyfieri.png'));
   const navigation = useNavigation();
 
-
+  
   const data = [
     { id: '1', title: 'Review 1', description: 'This is review 1' },
     { id: '2', title: 'Review 2', description: 'This is review 2' },
@@ -41,6 +41,10 @@ export default function ProfileScreen() {
       navigation.replace("Login");
     })
     .catch((error) => alert(error.message)); 
+  }
+
+  const handleEditProfile = () => {
+    navigation.navigate("EditProfile");
   }
   /*
   useEffect(() => {
@@ -77,7 +81,7 @@ export default function ProfileScreen() {
               <Text style={styles.statisticLabel}>Followers</Text>
             </View>
           </View>
-          <TouchableOpacity style={{backgroundColor: '#c2c2c2', padding: 5, borderRadius: 5, alignItems: 'center'}}> 
+          <TouchableOpacity style={{backgroundColor: '#c2c2c2', padding: 5, borderRadius: 5, alignItems: 'center'}} onPress={handleEditProfile}> 
             <Text style={{color: 'black', fontSize: 14, fontWeight: 'bold'}}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
