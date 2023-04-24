@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
 import { auth } from '../../firebase';
@@ -7,11 +7,33 @@ import { db } from '../../firebase';
 
 import { profileBackend } from './ProfileScreen/ProfileBackend';
 import NewPostButton from '../components/NewPostButton';
+import ReviewCard from '../components/ReviewCard';
 
 export default function ProfileScreen() {
-  const username = 'Username';
-  const displayName = 'Personal Information';
+  const [username, setUsername] = useState("");
+  const [bioText, setBioText] = useState("This is the text in my bio on my profile. It is a lot of text and it word wraps.");
+  const [numFollowing, setNumFollowing] = useState(2);
+  const [numFollowers, setNumFollowers] = useState(5);
+  const [profileImagePath, setProfileImagePath] = useState(require('../components/ReviewCard/guyfieri.png'));
   const navigation = useNavigation();
+
+
+  const data = [
+    { id: '1', title: 'Review 1', description: 'This is review 1' },
+    { id: '2', title: 'Review 2', description: 'This is review 2' },
+    { id: '3', title: 'Review 3', description: 'This is review 3' },
+    { id: '4', title: 'Review 4', description: 'This is review 4' },
+    { id: '5', title: 'Review 5', description: 'This is review 5' },
+    { id: '6', title: 'Review 6', description: 'This is review 6' },
+    { id: '7', title: 'Review 7', description: 'This is review 7' },
+    { id: '8', title: 'Review 8', description: 'This is review 8' },
+    { id: '9', title: 'Review 9', description: 'This is review 9' },
+    { id: '10', title: 'Review 10', description: 'This is review 10' },
+  ];
+
+  const renderItem = ({ item }) => (
+    <ReviewCard/>
+  );
 
   const handleSignOut = () => {
     auth.signOut()
@@ -20,23 +42,56 @@ export default function ProfileScreen() {
     })
     .catch((error) => alert(error.message)); 
   }
-
+  /*
+  useEffect(() => {
+    // Retrieve the user's bio from the Firebase database
+    db.collection("profile").doc(auth.currentUser?.uid).get()
+      .then(doc => {
+        if (doc.exists) {
+          setBioText(doc.data().bio || "");
+        } else {
+          console.log("No such document!");
+        }
+      })
+      .catch(error => {
+        console.log("Error getting document:", error);
+      });  
+  }, []);
+  */
+  
+  //          <Text style={styles.displayName}>{displayName}</Text>
+  //<Text>Name: incomplete </Text>
+  //<Text>Email: {auth.currentUser?.email}</Text>
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.displayName}>{displayName}</Text>
-        <Text>Name: incomplete </Text>
-        <Text>Email: {auth.currentUser?.email}</Text>
+      <View style={styles.basicInfoContainer}>
+        <Image source={profileImagePath} style={styles.profileImage} />
+        <View style={{flexDirection: 'column'}}>
+          <View style={styles.basicInfoTextContainer}>
+            <View style={styles.statisticContainer}>
+              <Text style={styles.statisticValueText}>{numFollowing}</Text>
+              <Text style={styles.statisticLabel}>Following</Text>
+            </View>
+            <View style={styles.statisticContainer}>
+              <Text style={styles.statisticValueText}>{numFollowers}</Text>
+              <Text style={styles.statisticLabel}>Followers</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={{backgroundColor: '#c2c2c2', padding: 5, borderRadius: 5, alignItems: 'center'}}> 
+            <Text style={{color: 'black', fontSize: 14, fontWeight: 'bold'}}>Edit Profile</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.bioContainer}>
-        <Text style={styles.bioHeader}>Bio</Text>
-        <TextInput
-          style={styles.bioInput}
-          placeholder="tell us about yourself"
-          multiline={true}
-          numberOfLines={4}
-        />
-      </View>
+      <Text style={styles.bioText}>{bioText}</Text>
+
+      <Text style={{fontSize: 20, fontWeight: 'bold',}}>Your Reviews</Text>
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
+        style={{width: '100%', borderTopWidth: 1, borderColor: '#c2c2c2'}}
+      />
       <TouchableOpacity style={styles.button}
         onPress={handleSignOut}>
         <Text style={styles.buttonText}>Log Out</Text>
@@ -51,40 +106,48 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#fff',
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    height: '100%',
   },
-  header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
+  basicInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    padding: 10,
+  },
+  basicInfoTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'space-between',
+    justifyContent: 'center',
     padding: 10,
   },
   displayName: {
     fontSize: 20,
     fontWeight: 'bold',
   },
-  bioContainer: {
-    position: 'absolute',
-    top: 150,
-    left: 0,
-    padding: 10,
-    width: '100%',
+  statisticContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: 5,
   },
-  bioHeader: {
+  statisticValueText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
+    paddingRight: 5,
   },
-  bioInput: {
-    height: 150,
+  statisticLabel: {
+    fontSize: 15,
+  },
+  bioText: {
     width: '100%',
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 10,
     padding: 10,
+    bottomBorderWidth: 1,
+    borderColor: 'black',
   },
   circle: {
     width: 100,
@@ -110,8 +173,13 @@ const styles = StyleSheet.create({
   },
   floatingButtonContainer: {
     position: 'absolute',
+    width: '100%',
     bottom: 0,
-    right: 0,
-    padding: 10,
+    center: 0,
+  },
+  profileImage: {
+    height: 90,
+    width: 90,
+    borderRadius: 75,
   },
 });
