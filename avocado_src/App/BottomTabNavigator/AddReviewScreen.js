@@ -1,10 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Image, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 export default function AddReviewScreen() {
+
+  const [dishList, setDishList] = useState([]);
+  const [restaurantList, setRestaurantList] = useState([]);
+  const dishCollection = collection(db, 'dish');
+  const restaurantCollection = collection(db, 'restaurant');
+
+  useEffect(() => {
+  const getDishes = async () => {
+    try {
+      const dishData = await getDocs(dishCollection);
+      const restaurantData = await getDocs(restaurantCollection);
+      const filteredDishData = dishData.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name
+      }));
+      const filteredRestaurantData = restaurantData.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name
+      }));
+      console.log(filteredDishData);
+      console.log(filteredRestaurantData)
+      setDishList(filteredDishData);
+      setRestaurantList(filteredRestaurantData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  getDishes();
+}, []);
+
+
   const navigation = useNavigation();
   const [rating, setRating] = useState(1);
   const [review, setReview] = useState('');
@@ -19,19 +52,9 @@ export default function AddReviewScreen() {
   const [selectedImage, setSelectedImage] = useState(null);
 
 
-  const restaurants = [
-    { id: '1', title: 'Pizza Hut' },
-    { id: '2', title: 'McDonalds' },
-    { id: '3', title: 'KFC' },
-    { id: '4', title: 'Burger King' },
-  ];
+  const restaurants = restaurantList;
   
-  const dishes = [
-    { id: '1', title: 'Pizza' },
-    { id: '2', title: 'Pasta' },
-    { id: '3', title: 'Salad' },
-    { id: '4', title: 'Soup' },
-  ];
+  const dishes = dishList;
 
   const handleInputChange = (text, type) => {
     if (type === 'restaurant') {
@@ -42,7 +65,7 @@ export default function AddReviewScreen() {
           return false;
         }
 
-        return item.title.toLowerCase().includes(text.toLowerCase());
+        return item.name.toLowerCase().includes(text.toLowerCase());
       });
 
       setAutocompleteRestaurantData(filteredData);
@@ -54,7 +77,7 @@ export default function AddReviewScreen() {
           return false;
         }
         
-        return item.title.toLowerCase().includes(text.toLowerCase());
+        return item.name.toLowerCase().includes(text.toLowerCase());
       });
 
       setAutocompleteDishData(filteredData);
@@ -63,10 +86,10 @@ export default function AddReviewScreen() {
 
   const handleSelectItem = (item, type) => {
     if (type === 'restaurant') {
-      setSearchRestaurantTerm(item.title);
+      setSearchRestaurantTerm(item.name);
       setAutocompleteRestaurantData([]);
     } else {
-      setSearchDishTerm(item.title);
+      setSearchDishTerm(item.name);
       setAutocompleteDishData([]);
     }
   };
@@ -122,7 +145,7 @@ export default function AddReviewScreen() {
                 renderItem={({ item }) => (
                   <TouchableOpacity style={styles.dropdownItemContainer} onPress={() => handleSelectItem(item, 'restaurant')}>
                     <View style={styles.dropdownItem}>
-                      <Text style={styles.dropdownText}>{item.title}</Text>
+                      <Text style={styles.dropdownText}>{item.name}</Text>
                     </View>
                   </TouchableOpacity>
                 )}
@@ -144,7 +167,7 @@ export default function AddReviewScreen() {
                 renderItem={({ item }) => (
                   <TouchableOpacity style={styles.dropdownItemContainer} onPress={() => handleSelectItem(item, 'dish')}>
                     <View style={styles.dropdownItem}>
-                      <Text style={styles.dropdownText}>{item.title}</Text>
+                      <Text style={styles.dropdownText}>{item.name}</Text>
                     </View>
                   </TouchableOpacity>
                 )}
