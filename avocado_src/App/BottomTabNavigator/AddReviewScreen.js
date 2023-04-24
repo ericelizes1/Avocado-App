@@ -75,6 +75,10 @@ export default function AddReviewScreen() {
     navigation.goBack();
   };
 
+  const handlePost = () => {
+    navigation.goBack();
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -228,7 +232,7 @@ export default function AddReviewScreen() {
         data={[]}
         renderItem={({ item }) => null}
         ListFooterComponent={
-          <TouchableOpacity style={styles.addButton}>
+          <TouchableOpacity style={styles.addButton} onPress={handlePost}>
             <Text style={styles.buttonText}>Post review</Text>
           </TouchableOpacity>
         }
