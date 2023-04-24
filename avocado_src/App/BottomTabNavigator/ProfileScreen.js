@@ -98,12 +98,8 @@ export default function ProfileScreen() {
             </View>
           </>
         }
-        style={{width: '100%', borderTopWidth: 1, borderColor: '#c2c2c2'}}
+        style={{width: '100%'}}
       />
-      <TouchableOpacity style={styles.button}
-        onPress={handleSignOut}>
-        <Text style={styles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
       <StatusBar style="auto" />
       <View style={styles.floatingButtonContainer}>
         <NewPostButton/>

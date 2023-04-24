@@ -80,11 +80,12 @@ export default function ReviewCard({rating, text, user, photo, name, date, dish,
       </View>
 
       {/*Interact Bar*/}
-      <View style={[styles.profileBarContainer, { paddingHorizontal: 10 }]}>
-        <TouchableOpacity style={styles.profileButtonContainer} hitSlop={10}>
-          <MaterialCommunityIcons name="arrow-right-bottom" size={30} color="black" />
-          <Text style={{fontWeight: "bold", fontSize: 15}}>See Comments</Text>
-        </TouchableOpacity>
+      <View style={{flexDirection: 'row',
+                    width: '100%',
+                    padding: 10,
+                    justifyContent: 'flex-end',   
+                    paddingHorizontal: 10 }}
+      >
         <View style={styles.profileButtonContainer}>
           <Text style={{ fontWeight: 'bold', fontSize: 15 }}>102k</Text>
           <TouchableOpacity onPress={handleLike} hitSlop={10}>

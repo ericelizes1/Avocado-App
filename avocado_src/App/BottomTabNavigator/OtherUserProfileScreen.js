@@ -6,7 +6,6 @@ import { auth } from '../../firebase';
 import { db } from '../../firebase';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 
-import { profileBackend } from './ProfileScreen/ProfileBackend';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 
@@ -17,6 +16,11 @@ export default function ProfileScreen() {
   const [numFollowers, setNumFollowers] = useState(5);
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
+  const [isFollowed, setIsFollowed] = useState(false);
+
+  const handleFollow = () => {
+    setIsFollowed(!isFollowed);
+  };
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -75,9 +79,9 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <View style={{alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
           <TouchableOpacity onPress={handleGoBack}>
-            <Ionicons name="close" size={36} color="black" />
+            <Ionicons name="arrow-back" size={36} color="black" />
           </TouchableOpacity>
-          <Text style={styles.title}>Edit Profile</Text>
+          <Text style={styles.title}>@{username}</Text>
         </View>
         <View style={{ flex: 1 }} />
       </View>
@@ -101,8 +105,16 @@ export default function ProfileScreen() {
                     <Text style={styles.statisticLabel}>Followers</Text>
                   </View>
                 </View>
-                <TouchableOpacity style={{backgroundColor: '#c2c2c2', padding: 5, borderRadius: 5, alignItems: 'center'}} onPress={handleEditProfile}> 
-                  <Text style={{color: 'black', fontSize: 14, fontWeight: 'bold'}}>Edit Profile</Text>
+                <TouchableOpacity
+                  onPress={handleFollow}
+                  style={[styles.button, isFollowed ? styles.followed : styles.notFollowed]}
+                >
+                  <Ionicons
+                    name={isFollowed ? 'checkmark-sharp' : 'add-sharp'}
+                    size={20}
+                    color={isFollowed ? 'black' : 'white'}
+                  />
+                  <Text style={[styles.text, {color: isFollowed ? 'black' : 'white'}]}>{isFollowed ? 'Followed' : 'Follow'}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -112,16 +124,9 @@ export default function ProfileScreen() {
             </View>
           </>
         }
-        style={{width: '100%', borderTopWidth: 1, borderColor: '#c2c2c2'}}
+        style={{width: '100%'}}
       />
-      <TouchableOpacity style={styles.button}
-        onPress={handleSignOut}>
-        <Text style={styles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
       <StatusBar style="auto" />
-      <View style={styles.floatingButtonContainer}>
-        <NewPostButton/>
-      </View>
     </View>
   );
 }
@@ -133,6 +138,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     height: '100%',
+  },
+  header: {
+    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    borderBottomWidth: 1,
+    justifyContent: 'flex-end',
+    height: 100,
+    width: '100%',
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingLeft: 10,
   },
   basicInfoContainer: {
     flexDirection: 'row',
@@ -171,37 +193,34 @@ const styles = StyleSheet.create({
     bottomBorderWidth: 1,
     borderColor: 'black',
   },
-  circle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: 'black',
-    marginTop: 50,
-  },
   button: {
     backgroundColor: '#154c05',
-    width: '60%',
-    top: 260,
-    padding: 15,
-    borderRadius: 10,
-    margintop: 40,
-    alignItems: 'center'
+    padding: 5,
+    borderRadius: 5,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center'
   },
   buttonText: {
     color: 'white',
     fontWeight:'700',
     fontSize: 16,
   },
-  floatingButtonContainer: {
-    position: 'absolute',
-    width: '100%',
-    bottom: 0,
-    center: 0,
-  },
   profileImage: {
     height: 90,
     width: 90,
     borderRadius: 75,
   },
+  followed: {
+    backgroundColor: '#ccc',
+  },
+  notFollowed: {
+    backgroundColor: '#154c05',
+  },
+  text: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    paddingLeft: 5,
+  },
+  
 });
