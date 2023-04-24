@@ -1,8 +1,38 @@
 import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
+import {db} from '../../firebase';
+import {getDocs} from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { collection } from 'firebase/firestore';
+
+
 
 export default function HomeScreen() {
+const [reviewList, setReviewList] = useState([]); // state to store the list of reviews
+const reviewsCollection = collection(db, "reviews"); // reference to the reviews collection
+
+useEffect(() => {
+  const getReviews = async () => {
+    
+    try {
+      // Read the data
+      const reviewData = await getDocs(reviewsCollection);
+      const filteredData = reviewData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+
+      setReviewList(filteredData);
+      console.log(filteredData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  getReviews();
+}, []);
+
   const data = [
     { id: '1', title: 'Review 1', description: 'This is review 1' },
     { id: '2', title: 'Review 2', description: 'This is review 2' },
