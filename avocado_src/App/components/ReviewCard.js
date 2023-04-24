@@ -4,14 +4,23 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function ReviewCard({rating, text, user, photo, name, date, dish, restaurant}) {
   const [isLiked, setIsLiked] = useState(false); // state to track the like button status
+  const navigation = useNavigation();
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handleProfile = () => {
+    console.log('test')
+    navigation.navigate('OtherUserProfile', {
+      animation: 'slide_from_bottom',
+    });
   };
 
   // create an array of stars based on the number of stars you want to display
@@ -40,7 +49,7 @@ export default function ReviewCard({rating, text, user, photo, name, date, dish,
     <View style={styles.container}>
       {/*Profile Bar*/}
       <View style={styles.profileBarContainer}>
-        <TouchableOpacity style={styles.profileButtonContainer}>
+        <TouchableOpacity style={styles.profileButtonContainer} onPress={handleProfile}>
           <Image source={require('./ReviewCard/guyfieri.png')} style={styles.profileImage} />
           <View style={styles.profileTextContainer}>
             <Text style={{fontWeight: "bold", fontSize: 18}}>{name}</Text>

@@ -4,18 +4,23 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
 import { auth } from '../../firebase';
 import { db } from '../../firebase';
+import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 
 import { profileBackend } from './ProfileScreen/ProfileBackend';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 
 export default function ProfileScreen() {
+  const username = 'username';
   const bioText = "This is the text in my bio on my profile. It is a lot of text and it word wraps.";
-  const numFollowing = 2;
-  const numFollowers = 5;
+  const [numFollowing, setNumFollowing] = useState(2);
+  const [numFollowers, setNumFollowers] = useState(5);
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  }
   
   const data = [
     { id: '1', title: 'Review 1', description: 'This is review 1' },
@@ -67,6 +72,15 @@ export default function ProfileScreen() {
   //<Text>Email: {auth.currentUser?.email}</Text>
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={{alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
+          <TouchableOpacity onPress={handleGoBack}>
+            <Ionicons name="close" size={36} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Edit Profile</Text>
+        </View>
+        <View style={{ flex: 1 }} />
+      </View>
       <FlatList
         data={data}
         renderItem={renderItem}
