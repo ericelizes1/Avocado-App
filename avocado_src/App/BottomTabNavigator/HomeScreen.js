@@ -37,6 +37,7 @@ export default function HomeScreen() {
             userName,
           };
         });
+        console.log(updatedReviewList)
         setReviewList(updatedReviewList);
       } catch (error) {
         console.error(error);
@@ -54,6 +55,7 @@ export default function HomeScreen() {
         user={item.user}
         photo={item.photo || null}
         name ={item.userName}
+        date = {item.date}
       />
     );
   };

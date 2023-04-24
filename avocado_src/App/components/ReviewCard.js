@@ -6,7 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import * as Haptics from 'expo-haptics';
 
 
-export default function ReviewCard({rating, text, user, photo, name}) {
+export default function ReviewCard({rating, text, user, photo, name, date}) {
   const [isLiked, setIsLiked] = useState(false); // state to track the like button status
 
   const handleLike = () => {
@@ -50,7 +50,7 @@ export default function ReviewCard({rating, text, user, photo, name}) {
           <View style={{flexDirection: "row",}}>
             {stars}
           </View>
-          <Text style={{color: "#727272", fontSize: 13}}>3h ago</Text>
+          <Text style={{color: "#727272", fontSize: 13}}>{date}</Text>
         </View>
       </View>
 
