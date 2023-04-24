@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -208,11 +208,21 @@ export default function AddReviewScreen() {
             {/*Image*/}
             <View style={styles.dishContainer}>
               <Text style={styles.text}>Image (optional)</Text>
-              <TouchableOpacity style={styles.input} onPress={pickImage}>
-                <Text style={styles.itemText}>Import an image</Text>
+              <TouchableOpacity style={{padding: 10}} onPress={pickImage}>    
+                {selectedImage ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Image source={{ uri: selectedImage }} style={{ width: 100, height: 100 }} />  
+                    <TouchableOpacity onPress={() => setSelectedImage('')}>
+                      <Ionicons name="trash-bin" size={30} color="#727272" style={{ padding: 10}} />
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View style={{ backgroundColor: '#ccc', width: 100, height: 100, justifyContent: 'center', alignItems: 'center' }}>
+                    <Ionicons name="add" size={30} color="#fff" />
+                  </View>
+                )}      
               </TouchableOpacity>
             </View>
-
           </>
         }
         data={[]}
