@@ -6,7 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import * as Haptics from 'expo-haptics';
 
 
-export default function ReviewCard({rating, text, user, photo}) {
+export default function ReviewCard({rating, text, user, photo, name}) {
   const [isLiked, setIsLiked] = useState(false); // state to track the like button status
 
   const handleLike = () => {
@@ -42,8 +42,8 @@ export default function ReviewCard({rating, text, user, photo}) {
         <TouchableOpacity style={styles.profileButtonContainer}>
           <Image source={require('./ReviewCard/guyfieri.png')} style={styles.profileImage} />
           <View style={styles.profileTextContainer}>
-            <Text style={{fontWeight: "bold", fontSize: 18}}>{user}</Text>
-            <Text style={{color: "#727272", fontSize: 13}}>@guyfieri</Text>
+            <Text style={{fontWeight: "bold", fontSize: 18}}>{name}</Text>
+            <Text style={{color: "#727272", fontSize: 13}}>@{user}</Text>
           </View>
         </TouchableOpacity>
         <View style={styles.ratingsBarContainer}>

@@ -1,42 +1,62 @@
 import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
-import {db} from '../../firebase';
-import {getDocs} from 'firebase/firestore';
+import { db } from '../../firebase';
+import { getDocs } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { collection } from 'firebase/firestore';
 
-
-
 export default function HomeScreen() {
   const [reviewList, setReviewList] = useState([]);
-  const reviewsCollection = collection(db, "reviews");
+  const [profileList, setProfileList] = useState([]);
+  const profileCollection = collection(db, 'profile');
+  const reviewsCollection = collection(db, 'reviews');
 
   useEffect(() => {
     const getReviews = async () => {
       try {
         const reviewData = await getDocs(reviewsCollection);
+        const profileData = await getDocs(profileCollection);
         const filteredData = reviewData.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
         }));
-        setReviewList(filteredData);
-        console.log(filteredData);
+        const filteredProfileData = profileData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setProfileList(filteredProfileData);
+        const updatedReviewList = filteredData.map((review) => {
+          const userProfile = filteredProfileData.find(
+            (profile) => profile.id === review.user
+          );
+          const userName = userProfile ? userProfile.name : 'Unknown User';
+          return {
+            ...review,
+            userProfile,
+            userName,
+          };
+        });
+        setReviewList(updatedReviewList);
       } catch (error) {
         console.error(error);
       }
     };
+
     getReviews();
   }, []);
 
-  const renderItem = ({ item }) => (
-    <ReviewCard
-      rating={item.rating}
-      text={item.text}
-      user={item.user}
-      photo={item.photo || null}
-    />
-  );
+  const renderItem = ({ item }) => {
+    return (
+      <ReviewCard
+        rating={item.rating}
+        text={item.text}
+        user={item.user}
+        photo={item.photo || null}
+        name ={item.userName}
+      />
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -45,7 +65,7 @@ export default function HomeScreen() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        style={{ width: "100%" }}
+        style={{ width: '100%' }}
       />
       <View style={styles.floatingButtonContainer}>
         <NewPostButton />
@@ -68,4 +88,5 @@ const styles = StyleSheet.create({
     center: 0,
   },
 });
+
 
