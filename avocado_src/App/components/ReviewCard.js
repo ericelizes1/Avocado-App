@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar, } from 'expo-status-bar';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
@@ -6,7 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import * as Haptics from 'expo-haptics';
 
 
-export default function ReviewCard() {
+export default function ReviewCard({rating, text, user, photo}) {
   const [isLiked, setIsLiked] = useState(false); // state to track the like button status
 
   const handleLike = () => {
@@ -15,7 +15,7 @@ export default function ReviewCard() {
   };
 
   // create an array of stars based on the number of stars you want to display
-  const num = 5; // number of stars you want to display
+  const num = rating; // number of stars you want to display
   const stars = [];
   for (let i = 0; i < num; i++) {
     stars.push(<Ionicons key={i} name="md-star" size={22} color="#EDB900" paddingLeft={2} />);
@@ -42,7 +42,7 @@ export default function ReviewCard() {
         <TouchableOpacity style={styles.profileButtonContainer}>
           <Image source={require('./ReviewCard/guyfieri.png')} style={styles.profileImage} />
           <View style={styles.profileTextContainer}>
-            <Text style={{fontWeight: "bold", fontSize: 18}}>Guy Fieri</Text>
+            <Text style={{fontWeight: "bold", fontSize: 18}}>{user}</Text>
             <Text style={{color: "#727272", fontSize: 13}}>@guyfieri</Text>
           </View>
         </TouchableOpacity>
@@ -61,7 +61,7 @@ export default function ReviewCard() {
 
       {/*Review Content*/}
       <View style={styles.reviewContainer}>
-        <Text style={{fontSize: 15, color: "#454545"}}>This is the best chicken parmigiana I have ever had. Truly a shock, perhaps the best in The Land!</Text>
+        <Text style={{fontSize: 15, color: "#454545"}}>{text}</Text>
       </View>
 
       {/*Image*/}

@@ -9,59 +9,46 @@ import { collection } from 'firebase/firestore';
 
 
 export default function HomeScreen() {
-const [reviewList, setReviewList] = useState([]); // state to store the list of reviews
-const reviewsCollection = collection(db, "reviews"); // reference to the reviews collection
+  const [reviewList, setReviewList] = useState([]);
+  const reviewsCollection = collection(db, "reviews");
 
-useEffect(() => {
-  const getReviews = async () => {
-    
-    try {
-      // Read the data
-      const reviewData = await getDocs(reviewsCollection);
-      const filteredData = reviewData.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-
-      setReviewList(filteredData);
-      console.log(filteredData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  getReviews();
-}, []);
-
-  const data = [
-    { id: '1', title: 'Review 1', description: 'This is review 1' },
-    { id: '2', title: 'Review 2', description: 'This is review 2' },
-    { id: '3', title: 'Review 3', description: 'This is review 3' },
-    { id: '4', title: 'Review 4', description: 'This is review 4' },
-    { id: '5', title: 'Review 5', description: 'This is review 5' },
-    { id: '6', title: 'Review 6', description: 'This is review 6' },
-    { id: '7', title: 'Review 7', description: 'This is review 7' },
-    { id: '8', title: 'Review 8', description: 'This is review 8' },
-    { id: '9', title: 'Review 9', description: 'This is review 9' },
-    { id: '10', title: 'Review 10', description: 'This is review 10' },
-  ];
+  useEffect(() => {
+    const getReviews = async () => {
+      try {
+        const reviewData = await getDocs(reviewsCollection);
+        const filteredData = reviewData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setReviewList(filteredData);
+        console.log(filteredData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getReviews();
+  }, []);
 
   const renderItem = ({ item }) => (
-    <ReviewCard/>
+    <ReviewCard
+      rating={item.rating}
+      text={item.text}
+      user={item.user}
+      photo={item.photo || null}
+    />
   );
-
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={reviewList}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        style={{width: '100%'}}
+        style={{ width: "100%" }}
       />
       <View style={styles.floatingButtonContainer}>
-        <NewPostButton/>
+        <NewPostButton />
       </View>
     </View>
   );
