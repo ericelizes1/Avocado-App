@@ -1,25 +1,91 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Autocomplete from 'react-native-autocomplete-input';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddReviewScreen() {
   const navigation = useNavigation();
   const [rating, setRating] = useState(1);
-  const [dish, setDish] = useState('');
-  const [restaurant, setRestaurant] = useState('');
+  const [review, setReview] = useState('');
+
+
+  const [searchRestaurantTerm, setSearchRestaurantTerm] = useState('');
+  const [autocompleteRestaurantData, setAutocompleteRestaurantData] = useState([]);
+
+  const [searchDishTerm, setSearchDishTerm] = useState('');
+  const [autocompleteDishData, setAutocompleteDishData] = useState([]);
+
+  const [selectedImage, setSelectedImage] = useState(null);
+
+
+  const restaurants = [
+    { id: '1', title: 'Pizza Hut' },
+    { id: '2', title: 'McDonalds' },
+    { id: '3', title: 'KFC' },
+    { id: '4', title: 'Burger King' },
+  ];
+  
+  const dishes = [
+    { id: '1', title: 'Pizza' },
+    { id: '2', title: 'Pasta' },
+    { id: '3', title: 'Salad' },
+    { id: '4', title: 'Soup' },
+  ];
+
+  const handleInputChange = (text, type) => {
+    if (type === 'restaurant') {
+      setSearchRestaurantTerm(text);
+
+      const filteredData = restaurants.filter((item) => {
+        if (text === '') {
+          return false;
+        }
+
+        return item.title.toLowerCase().includes(text.toLowerCase());
+      });
+
+      setAutocompleteRestaurantData(filteredData);
+    } else {
+      setSearchDishTerm(text);
+
+      const filteredData = dishes.filter((item) => {
+        if (text === '') {
+          return false;
+        }
+        
+        return item.title.toLowerCase().includes(text.toLowerCase());
+      });
+
+      setAutocompleteDishData(filteredData);
+    }
+  };
+
+  const handleSelectItem = (item, type) => {
+    if (type === 'restaurant') {
+      setSearchRestaurantTerm(item.title);
+      setAutocompleteRestaurantData([]);
+    } else {
+      setSearchDishTerm(item.title);
+      setAutocompleteDishData([]);
+    }
+  };
 
   const handleGoBack = () => {
     navigation.goBack();
   };
 
-  const onDishSelected = (selectedDish) => {
-    setDish(selectedDish);
-  };
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-  const onRestaurantSelected = (selectedRestaurant) => {
-    setRestaurant(selectedRestaurant);
+    if (!result.cancelled) {
+      setSelectedImage(result.uri);
+    }
   };
 
   return (
@@ -33,86 +99,130 @@ export default function AddReviewScreen() {
         </View>
         <View style={{ flex: 1 }} />
       </View>
-      <ScrollView height='100%' width='100%' padding={15}>
-        <Autocomplete
-          style={styles.input}
-          data={['Pizza', 'Burger', 'Pasta', 'Salad']}
-          value={dish}
-          placeholder="Dish"
-          onChangeText={setDish}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => onDishSelected(item)}>
-              <Text>{item}</Text>
-            </TouchableOpacity>
-          )}
-        />
-        <Autocomplete
-          style={styles.input}
-          data={['McDonalds', 'KFC', 'Burger King', 'Pizza Hut']}
-          value={restaurant}
-          placeholder="Restaurant"
-          onChangeText={setRestaurant}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => onRestaurantSelected(item)}>
-              <Text>{item}</Text>
-            </TouchableOpacity>
-          )}
-        />
-        <TextInput
-          style={[styles.input, styles.descriptionInput]}
-          placeholder="Review"
-          multiline={true}
-          numberOfLines={4}
-        />
-        <Text>
-          
-        </Text>
-        <View style={styles.ratingContainer}>
-          <TouchableOpacity onPress={() => rating == 1 ? setRating(0) : setRating(1)}>
-            <Ionicons
-              name="md-star"
-              size={22}
-              color={rating < 1 ? "#ccc" : "#EDB900"}
-              paddingLeft={2}
-            />          
+      <FlatList
+        style={{ width: '100%' }}
+        ListHeaderComponent={
+          <>
+            {/*Restaurant*/}
+            <View style={styles.dishContainer}>
+              <Text style={styles.text}>Restaurant</Text>
+              <TextInput
+                style={styles.input} 
+                onChangeText={text => handleInputChange(text, 'restaurant')}
+                value={searchRestaurantTerm}
+                placeholder="Type an existing or new restaurant"
+              />
+              <FlatList
+                style={styles.autocomplete}
+                data={autocompleteRestaurantData}
+                renderItem={({ item }) => (
+                  <TouchableOpacity style={styles.dropdownItemContainer} onPress={() => handleSelectItem(item, 'restaurant')}>
+                    <View style={styles.dropdownItem}>
+                      <Text style={styles.dropdownText}>{item.title}</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id}
+              />
+            </View>
+            {/*Dish*/}
+            <View style={styles.dishContainer}>
+              <Text style={styles.text}>Dish</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={text => handleInputChange(text, 'dish')}
+                value={searchDishTerm}
+                placeholder="Type an existing or new dish"
+              />
+              <FlatList
+                style={styles.autocomplete}
+                data={autocompleteDishData}
+                renderItem={({ item }) => (
+                  <TouchableOpacity style={styles.dropdownItemContainer} onPress={() => handleSelectItem(item, 'dish')}>
+                    <View style={styles.dropdownItem}>
+                      <Text style={styles.dropdownText}>{item.title}</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id}
+              />
+            </View>
+            {/*Rating*/}
+            <View style={styles.ratingContainer}>
+              <Text style={styles.text}>Rating</Text>
+              <View style={styles.ratingStarContainer}>
+                <TouchableOpacity onPress={() => setRating(1)}>
+                  <Ionicons
+                    name="md-star"
+                    size={30}
+                    color={rating < 1 ? "#ccc" : "#EDB900"}
+                    paddingLeft={2}
+                  />          
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => rating == 2 ? setRating(1) : setRating(2)}>
+                  <Ionicons
+                    name="md-star"
+                    size={30}
+                    color={rating < 2 ? "#ccc" : "#EDB900"}
+                    paddingLeft={2}
+                  />          
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => rating == 3 ? setRating(2) : setRating(3)}>
+                  <Ionicons
+                    name="md-star"
+                    size={30}
+                    color={rating < 3 ? "#ccc" : "#EDB900"}
+                    paddingLeft={2}
+                  />          
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => rating == 4 ? setRating(3) : setRating(4)}>
+                  <Ionicons
+                    name="md-star"
+                    size={30}
+                    color={rating < 4 ? "#ccc" : "#EDB900"}
+                    paddingLeft={2}
+                  />          
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => rating == 5 ? setRating(4) : setRating(5)}>
+                  <Ionicons
+                    name="md-star"
+                    size={30}
+                    color={rating < 5 ? "#ccc" : "#EDB900"}
+                    paddingLeft={2}
+                  />          
+                </TouchableOpacity>
+              </View>
+            </View>
+            {/*Review*/}
+            <View style={styles.dishContainer}>
+              <Text style={styles.text}>Review</Text>
+              <TextInput
+                style={[styles.input, styles.descriptionInput]}
+                placeholder="Type your review here"
+                onChangeText={text => setReview(text)}
+                value={review}
+                multiline={true}
+                numberOfLines={6}
+              />
+            </View>
+            {/*Image*/}
+            <View style={styles.dishContainer}>
+              <Text style={styles.text}>Image (optional)</Text>
+              <TouchableOpacity style={styles.input} onPress={pickImage}>
+                <Text style={styles.itemText}>Import an image</Text>
+              </TouchableOpacity>
+            </View>
+
+          </>
+        }
+        data={[]}
+        renderItem={({ item }) => null}
+        ListFooterComponent={
+          <TouchableOpacity style={styles.addButton}>
+            <Text style={styles.buttonText}>Post review</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => rating == 2 ? setRating(1) : setRating(2)}>
-            <Ionicons
-              name="md-star"
-              size={22}
-              color={rating < 2 ? "#ccc" : "#EDB900"}
-              paddingLeft={2}
-            />          
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => rating == 3 ? setRating(2) : setRating(3)}>
-            <Ionicons
-              name="md-star"
-              size={22}
-              color={rating < 3 ? "#ccc" : "#EDB900"}
-              paddingLeft={2}
-            />          
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => rating == 4 ? setRating(3) : setRating(4)}>
-            <Ionicons
-              name="md-star"
-              size={22}
-              color={rating < 4 ? "#ccc" : "#EDB900"}
-              paddingLeft={2}
-            />          
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => rating == 5 ? setRating(4) : setRating(5)}>
-            <Ionicons
-              name="md-star"
-              size={22}
-              color={rating < 5 ? "#ccc" : "#EDB900"}
-              paddingLeft={2}
-            />          
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.addButton}>
-          <Text style={styles.buttonText}>Create Review</Text>
-        </TouchableOpacity>
-      </ScrollView>
+        }
+      />
     </View>
   );
 }
@@ -141,14 +251,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingLeft: 10,
   },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
   input: {
-    width: '80%',
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
+    borderColor: '#ccc',
     borderRadius: 5,
     padding: 10,
-    marginBottom: 20,
+    width: '100%',
+  },
+  autocomplete: {
+    backgroundColor: '#fff',
+    zIndex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    width: '100%',
+  },
+  autocompleteItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   descriptionInput: {
     height: 80,
@@ -157,15 +281,75 @@ const styles = StyleSheet.create({
     backgroundColor: "#9ABC06",
     borderRadius: 5,
     padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-    textAlign: 'center',
+    fontSize: 20,
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   ratingContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#ccc',
+    padding: 10,
+  },
+  ratingStarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  dishContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    zIndex: 1,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  itemText: {
+    fontSize: 15,
+    margin: 2,
+  },
+  autocompleteContainer: {
+    backgroundColor: 'black',
+    width: '100%',
+    height: 50,
+    zIndex: 1,
+  },
+  autocompleteInputContainer: {
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    padding: 0,
+    margin: 0,
+  },
+  dropdownItemContainer: {
+    backgroundColor: "white",
+    borderRadius: 5,
+  },
+  dropdownItem: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginRight: 5, 
+    marginBottom: 5, 
+    backgroundColor: '#9ABC06', 
+    paddingHorizontal: 10, 
+    paddingVertical: 5, 
+    borderRadius: 20 
+  },
+  dropdownText: {
+    color: "#FFF", 
+    fontSize: 15, 
+    fontWeight: "bold"
+  }
+
 });
+
