@@ -10,11 +10,10 @@ import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 
 export default function ProfileScreen() {
-  const [username, setUsername] = useState("");
-  const [bioText, setBioText] = useState("This is the text in my bio on my profile. It is a lot of text and it word wraps.");
-  const [numFollowing, setNumFollowing] = useState(2);
-  const [numFollowers, setNumFollowers] = useState(5);
-  const [profileImagePath, setProfileImagePath] = useState(require('../components/ReviewCard/guyfieri.png'));
+  const bioText = "This is the text in my bio on my profile. It is a lot of text and it word wraps.";
+  const numFollowing = 2;
+  const numFollowers = 5;
+  const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
 
   
