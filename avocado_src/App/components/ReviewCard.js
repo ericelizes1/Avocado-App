@@ -6,7 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import * as Haptics from 'expo-haptics';
 
 
-export default function ReviewCard({rating, text, user, photo, name, date}) {
+export default function ReviewCard({rating, text, user, photo, name, date, dish, restaurant}) {
   const [isLiked, setIsLiked] = useState(false); // state to track the like button status
 
   const handleLike = () => {
@@ -22,8 +22,9 @@ export default function ReviewCard({rating, text, user, photo, name, date}) {
   }
 
   // create an array of tags based on the number of tags you want to display
-  const tagsData = ["Chicken Parmigiana", "Maxi's Bistro", "Cleveland, OH"];
-  const tagColors = ["#9ABC06", "#154C05", "#964904"];
+  console.log(restaurant);
+  const tagsData = [dish, restaurant];
+  const tagColors = ["#9ABC06", "#154C05"];
   const tags = [];
   for (let i = 0; i < tagsData.length; i++) {
     tags.push(
