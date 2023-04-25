@@ -5,16 +5,54 @@ import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vect
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
+import { db } from '../../firebase';
+import { getDocs } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
 
+export default function ReviewCard({id, rating, text, user, photo, name, date, dish, restaurant}) {
+  const likesCollection = collection(db, 'Likes');
+  const [isLiked, setIsLiked] = useState(false);
 
-export default function ReviewCard({rating, text, user, photo, name, date, dish, restaurant}) {
-  const [isLiked, setIsLiked] = useState(false); // state to track the like button status
   const navigation = useNavigation();
 
-  const handleLike = () => {
+  useEffect(() => {
+    const getLiked = async () => {
+      try {
+        const likesData = await getDocs(likesCollection);
+        const filteredData = likesData.docs.map((doc) => doc.data());
+        const existingLike = filteredData.find((like) => like.review === id && like.user === user);
+        
+        setIsLiked(!!existingLike); // set isLiked to true/false based on whether existingLike is truthy
+        console.log('existingLike', existingLike);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    getLiked();
+  }, []);
+
+  const handleLike = async () => {
     setIsLiked(!isLiked);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  
+    // Check if the user has already liked the review
+    const likesData = await getDocs(likesCollection);
+    const filteredData = likesData.docs.map((doc) => doc.data());
+    const existingLike = filteredData.find((like) => like.review === id && like.user === user);
+  
+    if (existingLike) {
+      // Unlike the review if already liked
+      await db.doc(`Likes/${existingLike.id}`).delete();
+    } else {
+      // Like the review if not already liked
+      await likesCollection.add({
+        review: id,
+        user,
+      });
+    }
   };
+  
 
   const handleProfile = () => {
     console.log('test')

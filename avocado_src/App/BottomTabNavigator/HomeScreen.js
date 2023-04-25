@@ -8,7 +8,7 @@ import { collection } from 'firebase/firestore';
 
 export default function HomeScreen() {
   const [reviewList, setReviewList] = useState([]);
-  const [profileList, setProfileList] = useState([]);
+  const [profileList, setProfileList] = useState([]);  
   const [dishList, setDishList] = useState([]);
   const [restaurantList, setRestaurantList] = useState([]);
   const profileCollection = collection(db, 'profile');
@@ -88,6 +88,7 @@ export default function HomeScreen() {
     console.log(item.restaurantName)
     return (
       <ReviewCard
+        id={item.id}
         rating={item.rating}
         text={item.text}
         user={item.user}

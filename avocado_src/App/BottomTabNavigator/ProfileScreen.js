@@ -4,35 +4,93 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
 import { auth } from '../../firebase';
 import { db } from '../../firebase';
-
-import { profileBackend } from './ProfileScreen/ProfileBackend';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
+import { getDocs, collection } from 'firebase/firestore';
 
 export default function ProfileScreen() {
-  const bioText = "This is the text in my bio on my profile. It is a lot of text and it word wraps.";
+  const profileCollection = collection(db, 'profile');
+  const reviewsCollection = collection(db, 'reviews');
+  const dishCollection = collection(db, 'dish');
+  const restaurantCollection = collection(db, 'restaurant');
+  const [profileList , setProfileList] = useState([]);
+  const [reviewList, setReviewList] = useState([]);
+  const [bioText, setBioText] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [dishList, setDishList] = useState([]);
+  const [restaurantList, setRestaurantList] = useState([]);
   const numFollowing = 2;
   const numFollowers = 5;
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const getProfileData = async () => {
+      try {
+        const dishData = await getDocs(dishCollection);
+        const restaurantData = await getDocs(restaurantCollection);
+        const profileData = await getDocs(profileCollection);
+        const reviewData = await getDocs(reviewsCollection);
   
-  const data = [
-    { id: '1', title: 'Review 1', description: 'This is review 1' },
-    { id: '2', title: 'Review 2', description: 'This is review 2' },
-    { id: '3', title: 'Review 3', description: 'This is review 3' },
-    { id: '4', title: 'Review 4', description: 'This is review 4' },
-    { id: '5', title: 'Review 5', description: 'This is review 5' },
-    { id: '6', title: 'Review 6', description: 'This is review 6' },
-    { id: '7', title: 'Review 7', description: 'This is review 7' },
-    { id: '8', title: 'Review 8', description: 'This is review 8' },
-    { id: '9', title: 'Review 9', description: 'This is review 9' },
-    { id: '10', title: 'Review 10', description: 'This is review 10' },
-  ];
+        const filteredProfileData = profileData.docs.map((doc) => doc.data());
+        const filteredReviewData = reviewData.docs
+          .map((doc) =>
+            doc.data().user === auth.currentUser.email ? doc.data() : null
+          )
+          .filter((item) => item !== null);
+  
+        // Map dishes to reviews based on dish id
+        filteredReviewData.forEach((review) => {
+          const dish = dishData.docs.find((dish) => dish.id === review.dish);
+          const restaurant = restaurantData.docs.find(
+            (restaurant) => restaurant.id === dish.data().restaurant
+          );
+          review.dishName = dish ? dish.data().name : "Unknown Dish";
+          review.restaurantName = restaurant
+            ? restaurant.data().name
+            : "Unknown Restaurant";
+        });
 
-  const renderItem = ({ item }) => (
-    <ReviewCard/>
-  );
+
+        //map name to reviews based on user id in the profile collection
+        filteredReviewData.forEach((review) => {
+          const profile = profileData.docs.find((profile) => profile.id === review.user);
+          review.userName = profile ? profile.data().name : "Unknown User";
+        });
+
+        setProfileList(filteredProfileData);
+        setReviewList(filteredReviewData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    getProfileData();
+  }, []);
+  
+
+  useEffect(() => {
+    console.log(profileList);
+    console.log(reviewList)
+  }, [profileList, reviewList]);
+  
+  const data = reviewList;
+
+  const renderItem = ({ item }) => {
+    console.log(item.restaurantName)
+    return (
+      <ReviewCard
+        rating={item.rating}
+        text={item.text}
+        user={item.user}
+        photo={item.photo || null}
+        name={item.userName}
+        date={item.date}
+        dish={item.dishName}
+        restaurant={item.restaurantName}
+      />
+    );
+  };
 
   const handleSignOut = () => {
     auth.signOut()
@@ -45,26 +103,7 @@ export default function ProfileScreen() {
   const handleEditProfile = () => {
     navigation.navigate("EditProfile");
   }
-  /*
-  useEffect(() => {
-    // Retrieve the user's bio from the Firebase database
-    db.collection("profile").doc(auth.currentUser?.uid).get()
-      .then(doc => {
-        if (doc.exists) {
-          setBioText(doc.data().bio || "");
-        } else {
-          console.log("No such document!");
-        }
-      })
-      .catch(error => {
-        console.log("Error getting document:", error);
-      });  
-  }, []);
-  */
   
-  //          <Text style={styles.displayName}>{displayName}</Text>
-  //<Text>Name: incomplete </Text>
-  //<Text>Email: {auth.currentUser?.email}</Text>
   return (
     <View style={styles.container}>
       <FlatList
