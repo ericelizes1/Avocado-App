@@ -4,111 +4,117 @@ import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { SearchBar } from 'react-native-elements';
 
 import UserCard from '../components/UserCard';
 
 export default function DiscoverScreen() {
-  const [isSearchingReviews, setIsSearchingReviews] = useState(true);
   const Tab = createMaterialTopTabNavigator();
-
-
-  const data = [
-    { id: '1', title: 'Review 1', description: 'This is review 1' },
-    { id: '2', title: 'Review 2', description: 'This is review 2' },
-    { id: '3', title: 'Review 3', description: 'This is review 3' },
-    { id: '4', title: 'Review 4', description: 'This is review 4' },
-    { id: '5', title: 'Review 5', description: 'This is review 5' },
-    { id: '6', title: 'Review 6', description: 'This is review 6' },
-    { id: '7', title: 'Review 7', description: 'This is review 7' },
-    { id: '8', title: 'Review 8', description: 'This is review 8' },
-    { id: '9', title: 'Review 9', description: 'This is review 9' },
-    { id: '10', title: 'Review 10', description: 'This is review 10' },
-  ];
-
-  const renderItem = ({ item }) => <ReviewCard review={item} />;
+  const [searchTerm, setSearchTerm] = useState('');
   
   return (
     <>
-      <Tab.Navigator>
-        <Tab.Screen name="ReviewList" component={ReviewList}/>
-        <Tab.Screen name="UserList" component={UserList}/>
+      <DiscoverHeader setSearchTerm={setSearchTerm} searchTerm={searchTerm}/>
+      <Tab.Navigator
+        tabBarOptions={{
+          activeTintColor: '#9ABC06',
+          inactiveTintColor: '#727272',
+          indicatorStyle: {
+            backgroundColor: '#9ABC06',
+          },
+          labelStyle: {
+            fontWeight: 'bold',
+          },
+          style: {
+            backgroundColor: 'white',
+          },
+        }}
+      >
+        <Tab.Screen name="Reviews">
+          {() => <ReviewList searchTerm={searchTerm} />}
+        </Tab.Screen>
+
+        <Tab.Screen name="Users">
+          {() => <UserList searchTerm={searchTerm} />}
+        </Tab.Screen>
+
       </Tab.Navigator>
       <View style={styles.floatingButtonContainer}>
         <NewPostButton/>
       </View>
     </>
   );
-  /*
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={[styles.menuButton,
-          {
-            backgroundColor: isSearchingReviews ? 'white' : '#EBEBEB',
-            borderBottomWidth: isSearchingReviews ? 2 : 1,
-            borderBottomColor: isSearchingReviews ? "#9ABC06" : "#ccc",
-          }]}
-          onPress={() => setIsSearchingReviews(true)}
-        >
-          <Ionicons
-            name={'checkmark-sharp'}
-            size={20}
-            color={isSearchingReviews ? '#727272' : '#EBEBEB'}
-          />
-          <Text style={styles.menuText}>Reviews</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.menuButton,
-            {
-              backgroundColor: !isSearchingReviews ? 'white' : '#EBEBEB',
-              borderBottomWidth: !isSearchingReviews ? 2 : 1,
-              borderBottomColor: !isSearchingReviews ? "#9ABC06" : "#ccc",
-            },
-          ]}
-          onPress={() => setIsSearchingReviews(false)}
-        >
-          <Ionicons
-            name={'checkmark-sharp'}
-            size={20}
-            color={isSearchingReviews ? '#EBEBEB' : '#727272'}
-          />
-          <Text style={styles.menuText}>Users</Text>
-        </TouchableOpacity>
-      </View>
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        style={{ width: '100%' }}
-      />
-      <View style={styles.floatingButtonContainer}>
-        <NewPostButton/>
-      </View>
-    </View>
-  );*/
 }
 
-function ReviewList() {
+function DiscoverHeader(props) {
+  const setSearchTerm = (term) => {
+    props.setSearchTerm(term);
+  };
   
+  return (
+    <View style={styles.header}>
+        <SearchBar
+          placeholder='Search "avocado"'
+          onChangeText={setSearchTerm}
+          value={props.searchTerm}
+          onCancel={() => setSearchTerm('')}
+          onClear={() => setSearchTerm('')}
+          platform={Platform.OS === 'ios' ? 'ios' : 'android'}
+          containerStyle={styles.container}
+          inputContainerStyle={styles.inputContainer}
+          inputStyle={styles.text}
+        />
+    </View>
+  );
+}
+
+function ReviewList(props) {
+  console.log(props.searchTerm);
+
   const data = [
-    { id: '1', title: 'Review 1', description: 'This is review 1' },
-    { id: '2', title: 'Review 2', description: 'This is review 2' },
-    { id: '3', title: 'Review 3', description: 'This is review 3' },
-    { id: '4', title: 'Review 4', description: 'This is review 4' },
-    { id: '5', title: 'Review 5', description: 'This is review 5' },
-    { id: '6', title: 'Review 6', description: 'This is review 6' },
-    { id: '7', title: 'Review 7', description: 'This is review 7' },
-    { id: '8', title: 'Review 8', description: 'This is review 8' },
-    { id: '9', title: 'Review 9', description: 'This is review 9' },
-    { id: '10', title: 'Review 10', description: 'This is review 10' },
+    { id: '1', name: 'John', user: 'johndoe', text: 'This is review 1', rating: 3, date: 'April 22, 2023', dish: 'Pizza', restaurant: 'Pizza Hut' },
+    { id: '2', name: 'Jane', user: 'janedoe', text: 'This is review 2', rating: 4, date: 'April 21, 2023', dish: 'Burger', restaurant: 'McDonalds' },
+    { id: '3', name: 'Bob', user: 'bobby', text: 'This is review 3', rating: 5, date: 'April 20, 2023', dish: 'Sushi', restaurant: 'Nobu' },
+    { id: '4', name: 'Alice', user: 'alice', text: 'This is review 4', rating: 2, date: 'April 19, 2023', dish: 'Steak', restaurant: 'Ruths Chris' },
+    { id: '5', name: 'Mark', user: 'mark', text: 'This is review 5', rating: 4, date: 'April 18, 2023', dish: 'Tacos', restaurant: 'Taco Bell' },
+    { id: '6', name: 'Sarah', user: 'sarah', text: 'This is review 6', rating: 3, date: 'April 17, 2023', dish: 'Pasta', restaurant: 'Olive Garden' },
+    { id: '7', name: 'Mike', user: 'mike', text: 'This is review 7', rating: 5, date: 'April 16, 2023', dish: 'Fish and Chips', restaurant: 'The Codfather' },
+    { id: '8', name: 'Emily', user: 'emily', text: 'This is review 8', rating: 4, date: 'April 15, 2023', dish: 'Burrito', restaurant: 'Chipotle' },
+    { id: '9', name: 'David', user: 'david', text: 'This is review 9', rating: 3, date: 'April 14, 2023', dish: 'Sushi', restaurant: 'Sushi Go' },
+    { id: '10', name: 'Rachel', user: 'rachel', text: 'This is review 10', rating: 4, date: 'April 13, 2023', dish: 'Pasta', restaurant: 'Maggianos' },
   ];
 
-  const renderItem = ({ item }) => <ReviewCard review={item} />;
+  const filteredData = data.filter((item) => {
+    if (props.searchTerm === '') {
+      return true;
+    }
+
+    const searchTerm = props.searchTerm.toLowerCase();
+
+    return (
+      item.dish.toLowerCase().includes(searchTerm) ||
+      item.restaurant.toLowerCase().includes(searchTerm) ||
+      item.text.toLowerCase().includes(searchTerm) ||
+      item.user.toLowerCase().includes(searchTerm)
+    );
+  });
+
+  const renderItem = ({ item }) => (
+    <ReviewCard
+      name={item.name}
+      user={item.user}
+      text={item.text}
+      rating={item.rating}
+      date={item.date}
+      dish={item.dish}
+      restaurant={item.restaurant}
+    />
+  );
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={filteredData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
@@ -118,27 +124,47 @@ function ReviewList() {
   );
 }
 
-function UserList() {
+function UserList(props) {
+  console.log(props.searchTerm);
 
   const data = [
-    { id: '1', username: 'User 1', email: 'email 1', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '2', username: 'User 2', email: 'email 2', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '3', username: 'User 3', email: 'email 3', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '4', username: 'User 4', email: 'email 4', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '5', username: 'User 5', email: 'email 5', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '6', username: 'User 6', email: 'email 6', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '7', username: 'User 7', email: 'email 7', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '8', username: 'User 8', email: 'email 8', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '9', username: 'User 9', email: 'email 9', image: '../components/ReviewCard/guyfieri.png' },
-    { id: '10', username: 'User 10', email: 'email 10', image: '../components/ReviewCard/guyfieri.png' },
+    { id: '1', username: 'johndoe', name: 'john', image: require('../components/ReviewCard/guyfieri.png') }, 
+    { id: '2', username: 'janedoe', name: 'jane', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '3', username: 'bobby', name: 'gamer76', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '4', username: 'alice', name: 'aliceistheBEST', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '5', username: 'mark', name: 'markymark', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '6', username: 'sarah', name: 'daQUEEN', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '7', username: 'mike', name: 'mike', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '8', username: 'emily', name: 'emily', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '9', username: 'david', name: 'david', image: require('../components/ReviewCard/guyfieri.png') },
+    { id: '10', username: 'rachel', name: 'rachel', image: require('../components/ReviewCard/guyfieri.png') },
   ];
-  
-  const renderItem = ({ item }) => <UserCard user={item} />;
-  
+
+  const filteredData = data.filter((item) => {
+    if (props.searchTerm === '') {
+      return true;
+    }
+
+    const searchTerm = props.searchTerm.toLowerCase();
+
+    return (
+      item.username.toLowerCase().includes(searchTerm) ||
+      item.name.toLowerCase().includes(searchTerm) 
+    );
+  });
+
+  const renderItem = ({ item }) => (
+    <UserCard
+      username={item.username}
+      name={item.name}
+      image={item.image}
+    />
+  );
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={filteredData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
@@ -147,6 +173,7 @@ function UserList() {
     </View>
   );
 }
+
 
 
 const styles = StyleSheet.create({
@@ -155,10 +182,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#EBEBEB',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderColor: '#f2f2f2',
+    justifyContent: 'flex-end',
+    height: 100,
+    width: '100%',
+    padding: 10,
+    paddingTop: 30,
+    alignItems: 'center'
+  },
+  inputContainer: {
+    backgroundColor: '#f2f2f2',
+    height: 40,
+    top: 7,
+    borderRadius: 15,
   },
   menuButton: {
     width: '50%',

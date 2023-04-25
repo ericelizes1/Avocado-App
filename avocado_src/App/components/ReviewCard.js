@@ -31,7 +31,6 @@ export default function ReviewCard({rating, text, user, photo, name, date, dish,
   }
 
   // create an array of tags based on the number of tags you want to display
-  console.log(restaurant);
   const tagsData = [dish, restaurant];
   const tagColors = ["#9ABC06", "#154C05"];
   const tags = [];

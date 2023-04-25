@@ -24,7 +24,6 @@ import OtherUserProfileScreen from './App/BottomTabNavigator/OtherUserProfileScr
 
 //Headers
 import HomeHeader from './App/BottomTabNavigator/HomeScreen/HomeHeader';
-import DiscoverHeader from './App/BottomTabNavigator/DiscoverScreen/DiscoverHeader';
 import NotificationsHeader from './App/BottomTabNavigator/NotificationsScreen/NotificationsHeader';
 import ProfileHeader from './App/BottomTabNavigator/ProfileScreen/ProfileHeader';
 
@@ -113,7 +112,7 @@ function MainScreen() {
           name="Discover"
           component={DiscoverScreen}
           options={{
-            header: () => <DiscoverHeader/>,
+            header: () => null,
             tabBarIcon: ({ focused }) => {
               return focused ? (
                 <MaterialCommunityIcons name="compass" color='black' size={30} />
