@@ -12,6 +12,7 @@
     "@expo/webpack-config": "^18.0.1",
     "@react-native-firebase/app": "^17.4.0",
     "@react-navigation/bottom-tabs": "^6.5.7",
+    "@react-navigation/material-top-tabs": "^6.6.2",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "@react-navigation/stack": "^6.3.16",
@@ -27,6 +28,7 @@
     "react-native-autocomplete-input": "^5.3.2",
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "^2.9.0",
+    "react-native-tab-view": "^3.5.1",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "~0.18.10"
   },
