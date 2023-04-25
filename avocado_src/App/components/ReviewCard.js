@@ -13,6 +13,7 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
   const profileCollection = collection(db, 'profile');
   const likesCollection = collection(db, 'Likes');
   const [isLiked, setIsLiked] = useState(false);
+  const [numLikes, setNumLikes] = useState(0);
 
   const navigation = useNavigation();
 
@@ -26,6 +27,9 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
 
         // Check if the user has already liked the review
         setIsLiked(existingLike !== undefined ? true : false);
+
+        // Update the number of likes
+        setNumLikes(filteredData.filter((like) => like.review === id).length);
       } catch (error) {
         console.error(error);
       }
@@ -44,13 +48,15 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
     const existingLike = filteredData.find((like) => like.review === id && like.user === currUser);
 
     // Check if the user has already liked the review
-
     if (existingLike) {
       console.log(existingLike.id);
+
       // Unlike the review if already liked
+      setNumLikes(numLikes - 1);
       await deleteDoc(doc(likesCollection, existingLike.id));
     } else {
       // Like the review if not already liked
+      setNumLikes(numLikes + 1);
       await addDoc(likesCollection, {
         review: id,
         user: currUser,
@@ -129,7 +135,7 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
                     paddingHorizontal: 10 }}
       >
         <View style={styles.profileButtonContainer}>
-          <Text style={{ fontWeight: 'bold', fontSize: 15 }}>102k</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 15, paddingRight: 5 }}>{numLikes}</Text>
           <TouchableOpacity onPress={handleLike} hitSlop={10}>
             {isLiked ? (
               <MaterialCommunityIcons name="heart" size={30} color="red" />
