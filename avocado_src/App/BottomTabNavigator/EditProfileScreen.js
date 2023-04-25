@@ -3,14 +3,14 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, A
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { firebase } from '../../firebase';
-import { storage } from '../../firebase';
+import { firebase, storage, auth, db } from '../../firebase';
+import { collection, getDocs, addDoc } from "firebase/firestore";
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
   const [bio, setBio] = useState('');
-  const username="gamelyte";
-  const email = 'ere29@case.edu';
+  const username="undefined";
+  const email = auth.currentUser.email;
 
 
   const [selectedImage, setSelectedImage] = useState(null);
