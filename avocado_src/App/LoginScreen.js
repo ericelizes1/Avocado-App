@@ -41,7 +41,7 @@ const LoginScreen = () => {
         .then(userCredentials => {
             const user = userCredentials.user;
             alert("Logged in as: " + user.email);
-        }).catch(alert("Logging in..."))
+        }).catch(error => alert(error.message))
     } 
 
     return (
@@ -77,7 +77,7 @@ const LoginScreen = () => {
                 onPress={() => navigation.navigate("Register")}
                 style={[styles.button, styles.buttonOutline]}
                 >
-                    <Text style={styles.buttonOutlineText}>Register</Text>
+                    <Text style={styles.buttonOutlineText}>Sign Up</Text>
                 </TouchableOpacity>
             </View>
         </View>

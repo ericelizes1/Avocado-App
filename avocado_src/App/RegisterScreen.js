@@ -3,7 +3,10 @@ import { useNavigation } from '@react-navigation/core'
 import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View } from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase'
+import { db } from '../firebase'
+import { collection, getDocs, addDoc } from "firebase/firestore";
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import * as addProfilePhoto from 'expo-image-picker';
 
 
@@ -15,6 +18,7 @@ const RegisterScreen = () => {
     const [fetching, setFetching] = useState(false);
     const [error, setError] = useState("");
     const [isValid, setValid] = useState(true);
+    const usersCollection = collection(db, 'users');
 
     const navigation = useNavigation();
 
@@ -37,8 +41,8 @@ const RegisterScreen = () => {
         .then(userCredentials => {
             const user = userCredentials.user;
             console.log(user.email);
-        }) 
-        .catch(error => alert(error.message)) 
+        }).catch(error => alert(error.message))
+         
     }
 
     const pickImage = async () => {
@@ -48,6 +52,16 @@ const RegisterScreen = () => {
           aspect: [1, 1],
           quality: 1,
         });
+
+        if (!result.cancelled) {
+            setSelectedImage(result.uri, "test-image")
+            .then(() => {
+              Alert.alert("Success!");
+            })
+            .catch((error) => { //alerts can be deleted, for testing purposes
+              Alert.alert(error);
+            });
+          }
     }
 
     return (
@@ -64,7 +78,12 @@ const RegisterScreen = () => {
                   </View>
                 ) : (
                   <View style={{ backgroundColor: '#ccc', width: 100, height: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center' }}>
-                    <Ionicons name="person-circle" size={50} color="#fff" />
+                    <Ionicons
+                        name="ios-add"
+                        size={40}
+                        color="#FFF"
+                        style={{ marginLeft: 2 }}
+                    ></Ionicons>
                   </View>
                 )}      
               </TouchableOpacity>
