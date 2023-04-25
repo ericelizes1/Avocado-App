@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { firebase, storage, auth, db } from '../../firebase';
 import { collection, getDocs, addDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { v4 } from "uuid";
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
@@ -20,33 +22,37 @@ export default function EditProfileScreen() {
   };
 
   const handleSaveProfile = () => {
+    if (selectedImage == null) return;
+    const imageRef = ref(storage, `images/${selectedImage.name + v4()}`);
+    uploadBytes(imageRef, selectedImage).then((snapshot) => {
+      getDownloadURL(snapshot.ref).then((url) => {
+        setImageUrls((prev) => [...prev, url]);
+      });
+      alert("Uploaded image!");
+    }).catch(alert("fuck"));
     navigation.goBack();
   }
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
+    console.log(result);
+
     if (!result.cancelled) {
-      setSelectedImage(result.uri, "test-image")
-      .then(() => {
-        Alert.alert("Success!");
-      })
-      .catch((error) => { //alerts can be deleted, for testing purposes
-        Alert.alert(error);
-      });
+      setSelectedImage(result.uri);
     }
   };
 
-  uploadImage = async (uri, imageName) => {
+  uploadImage = async (uri) => {
     const response = await fetch(uri);
     const blob = await response.blob();
 
-    var ref = firebase.storage().ref().child("images/" + imageName);
+    var ref = firebase.storage().ref().child("my-image");
     return ref.put(blob);
   }
 

@@ -3,13 +3,9 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity, Platform } from 're
 import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
-<<<<<<< Updated upstream
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SearchBar } from 'react-native-elements';
 
-=======
-//import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
->>>>>>> Stashed changes
 import UserCard from '../components/UserCard';
 
 export default function DiscoverScreen() {
