@@ -74,7 +74,7 @@ const LoginScreen = () => {
                     <Text style={styles.buttonText}>Login</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                onPress={handleSignUp}
+                onPress={() => navigation.navigate("Register")}
                 style={[styles.button, styles.buttonOutline]}
                 >
                     <Text style={styles.buttonOutlineText}>Register</Text>

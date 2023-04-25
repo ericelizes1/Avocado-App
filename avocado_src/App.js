@@ -14,6 +14,7 @@ import DiscoverScreen from './App/BottomTabNavigator/DiscoverScreen';
 import NotificationsScreen from './App/BottomTabNavigator/NotificationsScreen';
 import ProfileScreen from './App/BottomTabNavigator/ProfileScreen';
 import LoginScreen from './App/LoginScreen';
+import RegisterScreen from './App/RegisterScreen';
 
 // Components
 import AddReviewScreen from './App/BottomTabNavigator/AddReviewScreen';
@@ -41,6 +42,7 @@ export default function App() {
           cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
         }}
       >
+        <Stack.Screen name="Register" component={RegisterScreen}/>
         <Stack.Screen name="Login" component={LoginScreen}/>
         <Stack.Screen name="Main" component={MainScreen}/>
         <Stack.Screen

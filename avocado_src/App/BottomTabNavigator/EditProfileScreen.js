@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { firebase } from '../../firebase';
+import { storage } from '../../firebase';
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
@@ -17,18 +19,37 @@ export default function EditProfileScreen() {
     navigation.goBack();
   };
 
+  const handleSaveProfile = () => {
+
+    alert("Profile saved!");
+  };
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
 
     if (!result.cancelled) {
-      setSelectedImage(result.uri);
+      setSelectedImage(result.uri, "test-image")
+      .then(() => {
+        Alert.alert("Success!");
+      })
+      .catch((error) => { //alerts can be deleted, for testing purposes
+        Alert.alert(error);
+      });
     }
   };
+
+  uploadImage = async (uri, imageName) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    var ref = firebase.storage().ref().child("images/" + imageName);
+    return ref.put(blob);
+  }
 
   return (
     <View style={styles.container}>
@@ -82,7 +103,7 @@ export default function EditProfileScreen() {
         renderItem={({ item }) => null}
         ListFooterComponent={
           <View style={{alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
-            <TouchableOpacity style={styles.saveButton}>
+            <TouchableOpacity style={styles.saveButton} onPress={uploadImage}>
               <Text style={styles.buttonText}>Save profile</Text>
             </TouchableOpacity>
           </View>
