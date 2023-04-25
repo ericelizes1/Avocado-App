@@ -20,9 +20,8 @@ export default function EditProfileScreen() {
   };
 
   const handleSaveProfile = () => {
-
-    alert("Profile saved!");
-  };
+    navigation.goBack();
+  }
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -103,7 +102,7 @@ export default function EditProfileScreen() {
         renderItem={({ item }) => null}
         ListFooterComponent={
           <View style={{alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
-            <TouchableOpacity style={styles.saveButton} onPress={uploadImage}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
               <Text style={styles.buttonText}>Save profile</Text>
             </TouchableOpacity>
           </View>

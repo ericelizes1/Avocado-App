@@ -19,6 +19,7 @@ import RegisterScreen from './App/RegisterScreen';
 // Components
 import AddReviewScreen from './App/BottomTabNavigator/AddReviewScreen';
 import EditProfileScreen from './App/BottomTabNavigator/EditProfileScreen';
+import OtherUserProfileScreen from './App/BottomTabNavigator/OtherUserProfileScreen';
 
 
 //Headers
@@ -77,6 +78,10 @@ export default function App() {
         <Stack.Screen
           name="EditProfile"
           component={EditProfileScreen}
+        />   
+        <Stack.Screen
+          name="OtherUserProfile"         
+          component={OtherUserProfileScreen}
         />            
       </Stack.Navigator>
     </NavigationContainer>

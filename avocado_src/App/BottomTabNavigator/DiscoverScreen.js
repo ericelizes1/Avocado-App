@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
+import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 
 export default function DiscoverScreen() {
+  const [isSearchingReviews, setIsSearchingReviews] = useState(true);
 
   const data = [
     { id: '1', title: 'Review 1', description: 'This is review 1' },
@@ -24,10 +26,20 @@ export default function DiscoverScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.menuButton}>
-          <Text style={styles.menuText}>Filter</Text>
+          <Ionicons
+            name={isSearchingReviews ? 'checkmark-sharp' : 'add-sharp'}
+            size={20}
+            color={isSearchingReviews ? 'black' : 'white'}
+          />
+          <Text style={styles.menuText}>Reviews</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuButton}>
-          <Text style={styles.menuText}>Sort</Text>
+        <Ionicons
+            name={isSearchingReviews ? 'checkmark-sharp' : 'add-sharp'}
+            size={20}
+            color={isSearchingReviews ? 'black' : 'white'}
+          />
+          <Text style={styles.menuText}>Users</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -60,8 +72,9 @@ const styles = StyleSheet.create({
   menuButton: {
     backgroundColor: '#fff',
     borderRadius: 30,
-    paddingHorizontal: 60,
+    paddingHorizontal: '15%',
     paddingVertical: 5,
+    flexDirection: 'row',
   },
   menuText: {
     fontSize: 17,

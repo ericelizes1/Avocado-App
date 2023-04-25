@@ -67,38 +67,39 @@ export default function ProfileScreen() {
   //<Text>Email: {auth.currentUser?.email}</Text>
   return (
     <View style={styles.container}>
-      <View style={styles.basicInfoContainer}>
-        <Image source={profileImagePath} style={styles.profileImage} />
-        <View style={{flexDirection: 'column'}}>
-          <View style={styles.basicInfoTextContainer}>
-            <View style={styles.statisticContainer}>
-              <Text style={styles.statisticValueText}>{numFollowing}</Text>
-              <Text style={styles.statisticLabel}>Following</Text>
-            </View>
-            <View style={styles.statisticContainer}>
-              <Text style={styles.statisticValueText}>{numFollowers}</Text>
-              <Text style={styles.statisticLabel}>Followers</Text>
-            </View>
-          </View>
-          <TouchableOpacity style={{backgroundColor: '#c2c2c2', padding: 5, borderRadius: 5, alignItems: 'center'}} onPress={handleEditProfile}> 
-            <Text style={{color: 'black', fontSize: 14, fontWeight: 'bold'}}>Edit Profile</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <Text style={styles.bioText}>{bioText}</Text>
-
-      <Text style={{fontSize: 20, fontWeight: 'bold',}}>Your Reviews</Text>
       <FlatList
         data={data}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
-        style={{width: '100%', borderTopWidth: 1, borderColor: '#c2c2c2'}}
+        ListHeaderComponent={
+          <>
+            <View style={styles.basicInfoContainer}>
+              <Image source={profileImagePath} style={styles.profileImage} />
+              <View style={{flexDirection: 'column'}}>
+                <View style={styles.basicInfoTextContainer}>
+                  <View style={styles.statisticContainer}>
+                    <Text style={styles.statisticValueText}>{numFollowing}</Text>
+                    <Text style={styles.statisticLabel}>Following</Text>
+                  </View>
+                  <View style={styles.statisticContainer}>
+                    <Text style={styles.statisticValueText}>{numFollowers}</Text>
+                    <Text style={styles.statisticLabel}>Followers</Text>
+                  </View>
+                </View>
+                <TouchableOpacity style={{backgroundColor: '#c2c2c2', padding: 5, borderRadius: 5, alignItems: 'center'}} onPress={handleEditProfile}> 
+                  <Text style={{color: 'black', fontSize: 14, fontWeight: 'bold'}}>Edit Profile</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <Text style={styles.bioText}>{bioText}</Text>
+            <View style={{width: '100%', alignItems: 'center', borderTopWidth: 1, borderColor: '#ccc', borderBottomWidth: 1, padding: 10, marginTop: 10}}>
+              <Text style={{fontSize: 20, fontWeight: 'bold',}}>Your Reviews</Text>
+            </View>
+          </>
+        }
+        style={{width: '100%'}}
       />
-      <TouchableOpacity style={styles.button}
-        onPress={handleSignOut}>
-        <Text style={styles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
       <StatusBar style="auto" />
       <View style={styles.floatingButtonContainer}>
         <NewPostButton/>

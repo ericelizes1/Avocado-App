@@ -9,14 +9,21 @@ import { collection } from 'firebase/firestore';
 export default function HomeScreen() {
   const [reviewList, setReviewList] = useState([]);
   const [profileList, setProfileList] = useState([]);
+  const [dishList, setDishList] = useState([]);
+  const [restaurantList, setRestaurantList] = useState([]);
   const profileCollection = collection(db, 'profile');
   const reviewsCollection = collection(db, 'reviews');
+  const dishCollection = collection(db, 'dish');
+  const restaurantCollection = collection(db, 'restaurant');
 
   useEffect(() => {
     const getReviews = async () => {
       try {
         const reviewData = await getDocs(reviewsCollection);
         const profileData = await getDocs(profileCollection);
+        const dishData = await getDocs(dishCollection);
+        const restaurantData = await getDocs(restaurantCollection);
+
         const filteredData = reviewData.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
@@ -25,20 +32,50 @@ export default function HomeScreen() {
           ...doc.data(),
           id: doc.id,
         }));
+        const filteredDishData = dishData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        const filteredRestaurantData = restaurantData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+
+        console.log(filteredDishData);
+        console.log(filteredData);
+
         setProfileList(filteredProfileData);
+        setDishList(filteredDishData);
+        setRestaurantList(filteredRestaurantData);
+
         const updatedReviewList = filteredData.map((review) => {
           const userProfile = filteredProfileData.find(
             (profile) => profile.id === review.user
           );
           const userName = userProfile ? userProfile.name : 'Unknown User';
+
+          const dish = filteredDishData.find(
+            (dish) => dish.id === review.dish
+          );
+          const dishName = dish ? dish.name : 'Unknown Dish';
+
+          const restaurant = filteredRestaurantData.find(
+            (restaurant) => restaurant.id === dish.restaurant
+          );
+          const restaurantName = restaurant ? restaurant.name : 'Unknown Restaurant';
+
           return {
             ...review,
             userProfile,
             userName,
+            dish,
+            dishName,
+            restaurantName,
           };
         });
-        console.log(updatedReviewList)
+
         setReviewList(updatedReviewList);
+        console.log(reviewList);
       } catch (error) {
         console.error(error);
       }
@@ -48,14 +85,17 @@ export default function HomeScreen() {
   }, []);
 
   const renderItem = ({ item }) => {
+    console.log(item.restaurantName)
     return (
       <ReviewCard
         rating={item.rating}
         text={item.text}
         user={item.user}
         photo={item.photo || null}
-        name ={item.userName}
-        date = {item.date}
+        name={item.userName}
+        date={item.date}
+        dish={item.dishName}
+        restaurant={item.restaurantName}
       />
     );
   };

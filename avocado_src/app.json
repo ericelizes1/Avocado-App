@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "AvocadoApp",
-    "slug": "AvocadoApp",
+    "slug": "avocado-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b6cc5630-9f1e-44e3-ae75-152cb7a06a00"
+      }
+    },
+    "owner": "ere29"
   }
 }

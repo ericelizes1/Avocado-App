@@ -4,14 +4,23 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
+import { useNavigation } from '@react-navigation/native';
 
 
-export default function ReviewCard({rating, text, user, photo, name, date}) {
+export default function ReviewCard({rating, text, user, photo, name, date, dish, restaurant}) {
   const [isLiked, setIsLiked] = useState(false); // state to track the like button status
+  const navigation = useNavigation();
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handleProfile = () => {
+    console.log('test')
+    navigation.navigate('OtherUserProfile', {
+      animation: 'slide_from_bottom',
+    });
   };
 
   // create an array of stars based on the number of stars you want to display
@@ -22,8 +31,9 @@ export default function ReviewCard({rating, text, user, photo, name, date}) {
   }
 
   // create an array of tags based on the number of tags you want to display
-  const tagsData = ["Chicken Parmigiana", "Maxi's Bistro", "Cleveland, OH"];
-  const tagColors = ["#9ABC06", "#154C05", "#964904"];
+  console.log(restaurant);
+  const tagsData = [dish, restaurant];
+  const tagColors = ["#9ABC06", "#154C05"];
   const tags = [];
   for (let i = 0; i < tagsData.length; i++) {
     tags.push(
@@ -39,7 +49,7 @@ export default function ReviewCard({rating, text, user, photo, name, date}) {
     <View style={styles.container}>
       {/*Profile Bar*/}
       <View style={styles.profileBarContainer}>
-        <TouchableOpacity style={styles.profileButtonContainer}>
+        <TouchableOpacity style={styles.profileButtonContainer} onPress={handleProfile}>
           <Image source={require('./ReviewCard/guyfieri.png')} style={styles.profileImage} />
           <View style={styles.profileTextContainer}>
             <Text style={{fontWeight: "bold", fontSize: 18}}>{name}</Text>
@@ -70,11 +80,12 @@ export default function ReviewCard({rating, text, user, photo, name, date}) {
       </View>
 
       {/*Interact Bar*/}
-      <View style={[styles.profileBarContainer, { paddingHorizontal: 10 }]}>
-        <TouchableOpacity style={styles.profileButtonContainer} hitSlop={10}>
-          <MaterialCommunityIcons name="arrow-right-bottom" size={30} color="black" />
-          <Text style={{fontWeight: "bold", fontSize: 15}}>See Comments</Text>
-        </TouchableOpacity>
+      <View style={{flexDirection: 'row',
+                    width: '100%',
+                    padding: 10,
+                    justifyContent: 'flex-end',   
+                    paddingHorizontal: 10 }}
+      >
         <View style={styles.profileButtonContainer}>
           <Text style={{ fontWeight: 'bold', fontSize: 15 }}>102k</Text>
           <TouchableOpacity onPress={handleLike} hitSlop={10}>
