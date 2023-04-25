@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect,  } from 'react';
+import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity, RefreshControl } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
 import { auth } from '../../firebase';
@@ -7,12 +7,15 @@ import { db } from '../../firebase';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 import { getDocs, collection } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 export default function ProfileScreen() {
   const profileCollection = collection(db, 'profile');
   const reviewsCollection = collection(db, 'reviews');
   const dishCollection = collection(db, 'dish');
   const restaurantCollection = collection(db, 'restaurant');
+  const [refreshing, setRefreshing] = useState(false);
   const [profileList , setProfileList] = useState([]);
   const [reviewList, setReviewList] = useState([]);
   const [bioText, setBioText] = useState("");
@@ -24,55 +27,58 @@ export default function ProfileScreen() {
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const getProfileData = async () => {
-      try {
-        const dishData = await getDocs(dishCollection);
-        const restaurantData = await getDocs(restaurantCollection);
-        const profileData = await getDocs(profileCollection);
-        const reviewData = await getDocs(reviewsCollection);
-  
-        const filteredProfileData = profileData.docs.map((doc) => doc.data());
-        const filteredReviewData = reviewData.docs
-          .map((doc) =>
-            doc.data().user === auth.currentUser.email ? doc.data() : null
-          )
-          .filter((item) => item !== null);
-  
-        // Map dishes to reviews based on dish id
-        filteredReviewData.forEach((review) => {
-          const dish = dishData.docs.find((dish) => dish.id === review.dish);
-          const restaurant = restaurantData.docs.find(
-            (restaurant) => restaurant.id === dish.data().restaurant
-          );
-          review.dishName = dish ? dish.data().name : "Unknown Dish";
-          review.restaurantName = restaurant
-            ? restaurant.data().name
-            : "Unknown Restaurant";
-        });
-
-
-        //map name to reviews based on user id in the profile collection
-        filteredReviewData.forEach((review) => {
-          const profile = profileData.docs.find((profile) => profile.id === review.user);
-          review.userName = profile ? profile.data().name : "Unknown User";
-        });
-
-        setProfileList(filteredProfileData);
-        setReviewList(filteredReviewData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-  
-    getProfileData();
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getProfileData().then(() => setRefreshing(false));
   }, []);
-  
 
-  useEffect(() => {
-    console.log(profileList);
-    console.log(reviewList)
-  }, [profileList, reviewList]);
+  useFocusEffect(
+    React.useCallback(() => {
+      getProfileData();
+    }, [])
+  );
+
+  const getProfileData = async () => {
+    try {
+      const dishData = await getDocs(dishCollection);
+      const restaurantData = await getDocs(restaurantCollection);
+      const profileData = await getDocs(profileCollection);
+      const reviewData = await getDocs(reviewsCollection);
+
+      const filteredProfileData = profileData.docs.map((doc) => doc.data());
+      const filteredReviewData = reviewData.docs
+        .map((doc) =>({
+          ...doc.data(),
+          id: doc.id,})
+        )
+        .filter((item) => item !== null && item.user === auth.currentUser.email);
+
+      // Map dishes to reviews based on dish id
+      filteredReviewData.forEach((review) => {
+        const dish = dishData.docs.find((dish) => dish.id === review.dish);
+        const restaurant = restaurantData.docs.find(
+          (restaurant) => restaurant.id === dish.data().restaurant
+        );
+        review.dishName = dish ? dish.data().name : "Unknown Dish";
+        review.restaurantName = restaurant
+          ? restaurant.data().name
+          : "Unknown Restaurant";
+      });
+
+
+      //map name to reviews based on user id in the profile collection
+      filteredReviewData.forEach((review) => {
+        const profile = profileData.docs.find((profile) => profile.id === review.user);
+        review.userName = profile ? profile.data().name : "Unknown User";
+      });
+
+      setProfileList(filteredProfileData);
+      setReviewList(filteredReviewData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   
   const data = reviewList;
 
@@ -80,6 +86,7 @@ export default function ProfileScreen() {
     console.log(item.restaurantName)
     return (
       <ReviewCard
+        id={item.id}
         rating={item.rating}
         text={item.text}
         user={item.user}
@@ -138,6 +145,9 @@ export default function ProfileScreen() {
           </>
         }
         style={{width: '100%'}}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
       <StatusBar style="auto" />
       <View style={styles.floatingButtonContainer}>

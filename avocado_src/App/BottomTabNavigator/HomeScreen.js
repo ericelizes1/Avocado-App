@@ -1,88 +1,102 @@
-import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { FlatList, StyleSheet, Text, View, TouchableOpacity, RefreshControl } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
 import { db } from '../../firebase';
 import { getDocs } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { collection } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 export default function HomeScreen() {
   const [reviewList, setReviewList] = useState([]);
   const [profileList, setProfileList] = useState([]);  
   const [dishList, setDishList] = useState([]);
   const [restaurantList, setRestaurantList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const profileCollection = collection(db, 'profile');
   const reviewsCollection = collection(db, 'reviews');
   const dishCollection = collection(db, 'dish');
   const restaurantCollection = collection(db, 'restaurant');
 
-  useEffect(() => {
-    const getReviews = async () => {
-      try {
-        const reviewData = await getDocs(reviewsCollection);
-        const profileData = await getDocs(profileCollection);
-        const dishData = await getDocs(dishCollection);
-        const restaurantData = await getDocs(restaurantCollection);
+  const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  }
 
-        const filteredData = reviewData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        const filteredProfileData = profileData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        const filteredDishData = dishData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        const filteredRestaurantData = restaurantData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-
-        console.log(filteredDishData);
-        console.log(filteredData);
-
-        setProfileList(filteredProfileData);
-        setDishList(filteredDishData);
-        setRestaurantList(filteredRestaurantData);
-
-        const updatedReviewList = filteredData.map((review) => {
-          const userProfile = filteredProfileData.find(
-            (profile) => profile.id === review.user
-          );
-          const userName = userProfile ? userProfile.name : 'Unknown User';
-
-          const dish = filteredDishData.find(
-            (dish) => dish.id === review.dish
-          );
-          const dishName = dish ? dish.name : 'Unknown Dish';
-
-          const restaurant = filteredRestaurantData.find(
-            (restaurant) => restaurant.id === dish.restaurant
-          );
-          const restaurantName = restaurant ? restaurant.name : 'Unknown Restaurant';
-
-          return {
-            ...review,
-            userProfile,
-            userName,
-            dish,
-            dishName,
-            restaurantName,
-          };
-        });
-
-        setReviewList(updatedReviewList);
-        console.log(reviewList);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    getReviews();
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getReviews().then(() => setRefreshing(false));
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getReviews();
+    }, [])
+  );
+
+  const getReviews = async () => {
+    try {
+      const reviewData = await getDocs(reviewsCollection);
+      const profileData = await getDocs(profileCollection);
+      const dishData = await getDocs(dishCollection);
+      const restaurantData = await getDocs(restaurantCollection);
+
+      const filteredData = reviewData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      const filteredProfileData = profileData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      const filteredDishData = dishData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      const filteredRestaurantData = restaurantData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+
+      console.log(filteredDishData);
+      console.log(filteredData);
+
+      setProfileList(filteredProfileData);
+      setDishList(filteredDishData);
+      setRestaurantList(filteredRestaurantData);
+
+      const updatedReviewList = filteredData.map((review) => {
+        const userProfile = filteredProfileData.find(
+          (profile) => profile.id === review.user
+        );
+        const userName = userProfile ? userProfile.name : 'Unknown User';
+
+        const dish = filteredDishData.find(
+          (dish) => dish.id === review.dish
+        );
+        const dishName = dish ? dish.name : 'Unknown Dish';
+
+        const restaurant = filteredRestaurantData.find(
+          (restaurant) => restaurant.id === dish.restaurant
+        );
+        const restaurantName = restaurant ? restaurant.name : 'Unknown Restaurant';
+
+        return {
+          ...review,
+          userProfile,
+          userName,
+          dish,
+          dishName,
+          restaurantName,
+        };
+      });
+
+      setReviewList(updatedReviewList);
+      console.log(reviewList);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const renderItem = ({ item }) => {
     console.log(item.restaurantName)
@@ -109,6 +123,12 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         style={{ width: '100%' }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
       />
       <View style={styles.floatingButtonContainer}>
         <NewPostButton />

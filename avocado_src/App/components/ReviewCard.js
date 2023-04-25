@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { db } from '../../firebase';
 import { auth } from '../../firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function ReviewCard({id, rating, text, user, photo, name, date, dish, restaurant}) {
   const profileCollection = collection(db, 'profile');
@@ -17,26 +18,29 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
 
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const getLiked = async () => {
-      try {
-        const currUser = auth.currentUser.email;
-        const likesData = await getDocs(likesCollection);
-        const filteredData = likesData.docs.map((doc) => doc.data());
-        const existingLike = filteredData.find((like) => like.review === id && like.user === currUser);
 
-        // Check if the user has already liked the review
-        setIsLiked(existingLike !== undefined ? true : false);
+  useFocusEffect(
+    React.useCallback(() => {
+      getLiked();
+    }, [])
+  );    
 
-        // Update the number of likes
-        setNumLikes(filteredData.filter((like) => like.review === id).length);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-  
-    getLiked();
-  }, []);
+  const getLiked = async () => {
+    try {
+      const currUser = auth.currentUser.email;
+      const likesData = await getDocs(likesCollection);
+      const filteredData = likesData.docs.map((doc) => doc.data());
+      const existingLike = filteredData.find((like) => like.review === id && like.user === currUser);
+
+      // Check if the user has already liked the review
+      setIsLiked(existingLike !== undefined ? true : false);
+
+      // Update the number of likes
+      setNumLikes(filteredData.filter((like) => like.review === id).length);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleLike = async () => {
     setIsLiked(!isLiked);

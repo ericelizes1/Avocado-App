@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Platform, RefreshControl } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
@@ -7,6 +7,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { SearchBar } from 'react-native-elements';
 import { db } from '../../firebase';
 import { getDocs, collection } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 import UserCard from '../components/UserCard';
 
@@ -78,81 +79,87 @@ function ReviewList(props) {
   const profileCollection = collection(db, 'profile');
   const dishCollection = collection(db, 'dish');
   const restaurantCollection = collection(db, 'restaurant');
-  console.log('REVIEW');
-  console.log(props.searchTerm);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getReviews().then(() => setRefreshing(false));
+  }, []);
 
   
+  useFocusEffect(
+    React.useCallback(() => {
+      getReviews();
+    }, [])
+  );
 
-  useEffect(() => {
-    const getReviews = async () => {
-      try {
-        const reviewData = await getDocs(reviewsCollection);
-        const profileData = await getDocs(profileCollection);
-        const dishData = await getDocs(dishCollection);
-        const restaurantData = await getDocs(restaurantCollection);
+  const getReviews = async () => {
+    try {
+      const reviewData = await getDocs(reviewsCollection);
+      const profileData = await getDocs(profileCollection);
+      const dishData = await getDocs(dishCollection);
+      const restaurantData = await getDocs(restaurantCollection);
 
-        const filteredData = reviewData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        const filteredProfileData = profileData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        const filteredDishData = dishData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        const filteredRestaurantData = restaurantData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
+      const filteredData = reviewData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      const filteredProfileData = profileData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      const filteredDishData = dishData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      const filteredRestaurantData = restaurantData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
 
-        console.log(filteredDishData);
-        console.log(filteredData);
+      console.log(filteredDishData);
+      console.log(filteredData);
 
-        setProfileList(filteredProfileData);
-        setDishList(filteredDishData);
-        setRestaurantList(filteredRestaurantData);
+      setProfileList(filteredProfileData);
+      setDishList(filteredDishData);
+      setRestaurantList(filteredRestaurantData);
 
-        const updatedReviewList = filteredData.map((review) => {
-          const userProfile = filteredProfileData.find(
-            (profile) => profile.id === review.user
-          );
-          const userName = userProfile ? userProfile.name : 'Unknown User';
+      const updatedReviewList = filteredData.map((review) => {
+        const userProfile = filteredProfileData.find(
+          (profile) => profile.id === review.user
+        );
+        const userName = userProfile ? userProfile.name : 'Unknown User';
 
-          const dish = filteredDishData.find(
-            (dish) => dish.id === review.dish
-          );
-          const dishName = dish ? dish.name : 'Unknown Dish';
+        const dish = filteredDishData.find(
+          (dish) => dish.id === review.dish
+        );
+        const dishName = dish ? dish.name : 'Unknown Dish';
 
-          console.log("dish data:" + filteredRestaurantData);
-          const restaurant = filteredRestaurantData.find(
-            (restaurant) => restaurant.id === dish.restaurant
-          );
-          const restaurantName = restaurant ? restaurant.name : 'Unknown Restaurant';
+        console.log("dish data:" + filteredRestaurantData);
+        const restaurant = filteredRestaurantData.find(
+          (restaurant) => restaurant.id === dish.restaurant
+        );
+        const restaurantName = restaurant ? restaurant.name : 'Unknown Restaurant';
 
-          return {
-            ...review,
-            userProfile,
-            userName,
-            dish,
-            dishName,
-            restaurantName,
-          };
-        });
+        return {
+          ...review,
+          userProfile,
+          userName,
+          dish,
+          dishName,
+          restaurantName,
+        };
+      });
 
-        setReviewList(updatedReviewList);
-        console.log("Review List: " + reviewList);
-        console.log("Dish List: " + dishList);
-        console.log("Restaurant List: " + restaurantList);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+      setReviewList(updatedReviewList);
+      console.log("Review List: " + reviewList);
+      console.log("Dish List: " + dishList);
+      console.log("Restaurant List: " + restaurantList);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    getReviews();
-  }, []);
 
   const filteredData = reviewList.filter((review) => {
     const searchTerm = props.searchTerm.toLowerCase();
@@ -194,35 +201,46 @@ function ReviewList(props) {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         style={{ width: '100%' }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </View>
   );
 };
 
 function UserList(props) {
-  console.log(props.searchTerm);
-
+  const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState([]);
   const usersCollection = collection(db, 'profile');
 
-  useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const usersData = await getDocs(usersCollection);
-
-        const filteredData = usersData.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-
-        setData(filteredData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    getUsers();
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getUsers().then(() => setRefreshing(false));
   }, []);
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getUsers();
+    }, [])
+  );
+
+  const getUsers = async () => {
+    try {
+      const usersData = await getDocs(usersCollection);
+
+      const filteredData = usersData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+
+      setData(filteredData);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   const filteredData = data.filter((user) => {
     const searchTerm = props.searchTerm.toLowerCase();
@@ -252,6 +270,9 @@ function UserList(props) {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         style={{ width: '100%' }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </View>
   );

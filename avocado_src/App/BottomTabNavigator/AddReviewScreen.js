@@ -14,28 +14,28 @@ export default function AddReviewScreen() {
   const restaurantCollection = collection(db, 'restaurant');
 
   useEffect(() => {
-  const getDishes = async () => {
-    try {
-      const dishData = await getDocs(dishCollection);
-      const restaurantData = await getDocs(restaurantCollection);
-      const filteredDishData = dishData.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name
-      }));
-      const filteredRestaurantData = restaurantData.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name
-      }));
-      console.log(filteredDishData);
-      console.log(filteredRestaurantData)
-      setDishList(filteredDishData);
-      setRestaurantList(filteredRestaurantData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  getDishes();
-}, []);
+    const getDishes = async () => {
+      try {
+        const dishData = await getDocs(dishCollection);
+        const restaurantData = await getDocs(restaurantCollection);
+        const filteredDishData = dishData.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name
+        }));
+        const filteredRestaurantData = restaurantData.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name
+        }));
+        console.log(filteredDishData);
+        console.log(filteredRestaurantData)
+        setDishList(filteredDishData);
+        setRestaurantList(filteredRestaurantData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getDishes();
+  }, []);
 
 
   const navigation = useNavigation();
