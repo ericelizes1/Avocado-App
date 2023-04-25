@@ -58,7 +58,7 @@ export default function EditProfileScreen() {
       xhr.open('GET', uri, true);
       xhr.send(null);
     });
-    const ref = firebase.storage().ref().child(`images/${auth.currentUser.email}/${v4()}`);
+    const ref = storage.ref().child(`images/${auth.currentUser.email}/${v4()}`);
     const snapshot = ref.put(blob);
     blob.close();
     return await snapshot.ref.getDownloadURL();

@@ -6,7 +6,7 @@ export default function UserCard(props) {
   const navigation = useNavigation();
 
   const handleProfile = () => {
-    props.navigation.navigate('OtherUserProfile', {
+    navigation.navigate('OtherUserProfile', {
       username: props.username,
       name: props.name,
       image: props.image,

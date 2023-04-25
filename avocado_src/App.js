@@ -90,10 +90,16 @@ export default function App() {
 function MainScreen() {
   return (
     <Tab.Navigator
-          tabBarOptions={{
-            showLabel: false,
-          }}
-      >
+      screenOptions={{  
+        "tabBarShowLabel": false,
+        "tabBarStyle": [
+          {
+            "display": "flex"
+          },
+          null
+        ]
+      }}
+    >
         <Tab.Screen
           name="Login"
           component={HomeScreen}

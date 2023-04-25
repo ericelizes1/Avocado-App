@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Platform } from 'react-native';
 import ReviewCard from '../components/ReviewCard';
 import NewPostButton from '../components/NewPostButton';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SearchBar } from 'react-native-elements';
+import { db } from '../../firebase';
+import { getDocs, collection } from 'firebase/firestore';
 
 import UserCard from '../components/UserCard';
 
@@ -16,28 +18,26 @@ export default function DiscoverScreen() {
     <>
       <DiscoverHeader setSearchTerm={setSearchTerm} searchTerm={searchTerm}/>
       <Tab.Navigator
-        tabBarOptions={{
-          activeTintColor: '#9ABC06',
-          inactiveTintColor: '#727272',
-          indicatorStyle: {
-            backgroundColor: '#9ABC06',
+        screenOptions={{
+          tabBarActiveTintColor: "#9ABC06",
+          tabBarInactiveTintColor: "#727272",
+          tabBarLabelStyle: {
+            fontWeight: "bold"
           },
-          labelStyle: {
-            fontWeight: 'bold',
+          tabBarIndicatorStyle: {
+            backgroundColor: "#9ABC06"
           },
-          style: {
-            backgroundColor: 'white',
-          },
+          tabBarStyle: {
+            backgroundColor: "white"
+          }
         }}
       >
         <Tab.Screen name="Reviews">
           {() => <ReviewList searchTerm={searchTerm} />}
         </Tab.Screen>
-
         <Tab.Screen name="Users">
           {() => <UserList searchTerm={searchTerm} />}
         </Tab.Screen>
-
       </Tab.Navigator>
       <View style={styles.floatingButtonContainer}>
         <NewPostButton/>
@@ -49,13 +49,14 @@ export default function DiscoverScreen() {
 function DiscoverHeader(props) {
   const setSearchTerm = (term) => {
     props.setSearchTerm(term);
+
   };
-  
+
   return (
     <View style={styles.header}>
         <SearchBar
           placeholder='Search "avocado"'
-          onChangeText={setSearchTerm}
+          onChangeText={(text) => setSearchTerm(text)}
           value={props.searchTerm}
           onCancel={() => setSearchTerm('')}
           onClear={() => setSearchTerm('')}
@@ -69,47 +70,121 @@ function DiscoverHeader(props) {
 }
 
 function ReviewList(props) {
+  const [reviewList, setReviewList] = useState([]);
+  const [profileList, setProfileList] = useState([]);
+  const [dishList, setDishList] = useState([]);
+  const [restaurantList, setRestaurantList] = useState([]);
+  const reviewsCollection = collection(db, 'reviews');
+  const profileCollection = collection(db, 'profile');
+  const dishCollection = collection(db, 'dish');
+  const restaurantCollection = collection(db, 'restaurant');
+  console.log('REVIEW');
   console.log(props.searchTerm);
 
-  const data = [
-    { id: '1', name: 'John', user: 'johndoe', text: 'This is review 1', rating: 3, date: 'April 22, 2023', dish: 'Pizza', restaurant: 'Pizza Hut' },
-    { id: '2', name: 'Jane', user: 'janedoe', text: 'This is review 2', rating: 4, date: 'April 21, 2023', dish: 'Burger', restaurant: 'McDonalds' },
-    { id: '3', name: 'Bob', user: 'bobby', text: 'This is review 3', rating: 5, date: 'April 20, 2023', dish: 'Sushi', restaurant: 'Nobu' },
-    { id: '4', name: 'Alice', user: 'alice', text: 'This is review 4', rating: 2, date: 'April 19, 2023', dish: 'Steak', restaurant: 'Ruths Chris' },
-    { id: '5', name: 'Mark', user: 'mark', text: 'This is review 5', rating: 4, date: 'April 18, 2023', dish: 'Tacos', restaurant: 'Taco Bell' },
-    { id: '6', name: 'Sarah', user: 'sarah', text: 'This is review 6', rating: 3, date: 'April 17, 2023', dish: 'Pasta', restaurant: 'Olive Garden' },
-    { id: '7', name: 'Mike', user: 'mike', text: 'This is review 7', rating: 5, date: 'April 16, 2023', dish: 'Fish and Chips', restaurant: 'The Codfather' },
-    { id: '8', name: 'Emily', user: 'emily', text: 'This is review 8', rating: 4, date: 'April 15, 2023', dish: 'Burrito', restaurant: 'Chipotle' },
-    { id: '9', name: 'David', user: 'david', text: 'This is review 9', rating: 3, date: 'April 14, 2023', dish: 'Sushi', restaurant: 'Sushi Go' },
-    { id: '10', name: 'Rachel', user: 'rachel', text: 'This is review 10', rating: 4, date: 'April 13, 2023', dish: 'Pasta', restaurant: 'Maggianos' },
-  ];
+  
 
-  const filteredData = data.filter((item) => {
-    if (props.searchTerm === '') {
-      return true;
-    }
+  useEffect(() => {
+    const getReviews = async () => {
+      try {
+        const reviewData = await getDocs(reviewsCollection);
+        const profileData = await getDocs(profileCollection);
+        const dishData = await getDocs(dishCollection);
+        const restaurantData = await getDocs(restaurantCollection);
 
+        const filteredData = reviewData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        const filteredProfileData = profileData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        const filteredDishData = dishData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        const filteredRestaurantData = restaurantData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+
+        console.log(filteredDishData);
+        console.log(filteredData);
+
+        setProfileList(filteredProfileData);
+        setDishList(filteredDishData);
+        setRestaurantList(filteredRestaurantData);
+
+        const updatedReviewList = filteredData.map((review) => {
+          const userProfile = filteredProfileData.find(
+            (profile) => profile.id === review.user
+          );
+          const userName = userProfile ? userProfile.name : 'Unknown User';
+
+          const dish = filteredDishData.find(
+            (dish) => dish.id === review.dish
+          );
+          const dishName = dish ? dish.name : 'Unknown Dish';
+
+          console.log("dish data:" + filteredRestaurantData);
+          const restaurant = filteredRestaurantData.find(
+            (restaurant) => restaurant.id === dish.restaurant
+          );
+          const restaurantName = restaurant ? restaurant.name : 'Unknown Restaurant';
+
+          return {
+            ...review,
+            userProfile,
+            userName,
+            dish,
+            dishName,
+            restaurantName,
+          };
+        });
+
+        setReviewList(updatedReviewList);
+        console.log("Review List: " + reviewList);
+        console.log("Dish List: " + dishList);
+        console.log("Restaurant List: " + restaurantList);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getReviews();
+  }, []);
+
+  const filteredData = reviewList.filter((review) => {
     const searchTerm = props.searchTerm.toLowerCase();
+    const userName = review.userName.toLowerCase();
+    const dishName = review.dishName.toLowerCase();
+    const restaurantName = review.restaurantName.toLowerCase();
+    const text = review.text.toLowerCase();
 
     return (
-      item.dish.toLowerCase().includes(searchTerm) ||
-      item.restaurant.toLowerCase().includes(searchTerm) ||
-      item.text.toLowerCase().includes(searchTerm) ||
-      item.user.toLowerCase().includes(searchTerm)
+      userName.includes(searchTerm) ||
+      dishName.includes(searchTerm) ||
+      restaurantName.includes(searchTerm) ||
+      text.includes(searchTerm)
     );
   });
 
-  const renderItem = ({ item }) => (
-    <ReviewCard
-      name={item.name}
-      user={item.user}
-      text={item.text}
-      rating={item.rating}
-      date={item.date}
-      dish={item.dish}
-      restaurant={item.restaurant}
-    />
-  );
+  const renderItem = ({ item }) => {
+    console.log("Restaurant Name: " + item.restaurantName);
+    return (
+      <ReviewCard
+        id={item.id}
+        rating={item.rating}
+        text={item.text}
+        user={item.user}
+        photo={item.photo || null}
+        name={item.userName}
+        date={item.date}
+        dish={item.dishName}
+        restaurant={item.restaurantName}
+      />
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -122,36 +197,44 @@ function ReviewList(props) {
       />
     </View>
   );
-}
+};
 
 function UserList(props) {
   console.log(props.searchTerm);
 
-  const data = [
-    { id: '1', username: 'johndoe', name: 'john', image: require('../components/ReviewCard/guyfieri.png') }, 
-    { id: '2', username: 'janedoe', name: 'jane', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '3', username: 'bobby', name: 'gamer76', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '4', username: 'alice', name: 'aliceistheBEST', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '5', username: 'mark', name: 'markymark', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '6', username: 'sarah', name: 'daQUEEN', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '7', username: 'mike', name: 'mike', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '8', username: 'emily', name: 'emily', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '9', username: 'david', name: 'david', image: require('../components/ReviewCard/guyfieri.png') },
-    { id: '10', username: 'rachel', name: 'rachel', image: require('../components/ReviewCard/guyfieri.png') },
-  ];
+  const [data, setData] = useState([]);
+  const usersCollection = collection(db, 'profile');
 
-  const filteredData = data.filter((item) => {
-    if (props.searchTerm === '') {
-      return true;
-    }
+  useEffect(() => {
+    const getUsers = async () => {
+      try {
+        const usersData = await getDocs(usersCollection);
 
+        const filteredData = usersData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+
+        setData(filteredData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getUsers();
+  }, []);
+
+  const filteredData = data.filter((user) => {
     const searchTerm = props.searchTerm.toLowerCase();
+    const username = user.username.toLowerCase();
+    const name = user.name.toLowerCase();
 
     return (
-      item.username.toLowerCase().includes(searchTerm) ||
-      item.name.toLowerCase().includes(searchTerm) 
+      username.includes(searchTerm) ||
+      name.includes(searchTerm)
     );
   });
+
 
   const renderItem = ({ item }) => (
     <UserCard
