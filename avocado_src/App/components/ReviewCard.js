@@ -6,10 +6,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../../firebase';
-import { getDocs } from 'firebase/firestore';
-import { collection } from 'firebase/firestore';
+import { auth } from '../../firebase';
+import { collection, getDocs, addDoc, doc, deleteDoc } from 'firebase/firestore';
 
 export default function ReviewCard({id, rating, text, user, photo, name, date, dish, restaurant}) {
+  const profileCollection = collection(db, 'profile');
   const likesCollection = collection(db, 'Likes');
   const [isLiked, setIsLiked] = useState(false);
 
@@ -18,12 +19,13 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
   useEffect(() => {
     const getLiked = async () => {
       try {
+        const currUser = auth.currentUser.email;
         const likesData = await getDocs(likesCollection);
         const filteredData = likesData.docs.map((doc) => doc.data());
-        const existingLike = filteredData.find((like) => like.review === id && like.user === user);
-        
-        setIsLiked(!!existingLike); // set isLiked to true/false based on whether existingLike is truthy
-        console.log('existingLike', existingLike);
+        const existingLike = filteredData.find((like) => like.review === id && like.user === currUser);
+
+        // Check if the user has already liked the review
+        setIsLiked(existingLike !== undefined ? true : false);
       } catch (error) {
         console.error(error);
       }
@@ -36,19 +38,22 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
     setIsLiked(!isLiked);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   
-    // Check if the user has already liked the review
+    const currUser = auth.currentUser.email;
     const likesData = await getDocs(likesCollection);
-    const filteredData = likesData.docs.map((doc) => doc.data());
-    const existingLike = filteredData.find((like) => like.review === id && like.user === user);
-  
+    const filteredData = likesData.docs.map((doc) => ({...doc.data(), id: doc.id}));
+    const existingLike = filteredData.find((like) => like.review === id && like.user === currUser);
+
+    // Check if the user has already liked the review
+
     if (existingLike) {
+      console.log(existingLike.id);
       // Unlike the review if already liked
-      await db.doc(`Likes/${existingLike.id}`).delete();
+      await deleteDoc(doc(likesCollection, existingLike.id));
     } else {
       // Like the review if not already liked
-      await likesCollection.add({
+      await addDoc(likesCollection, {
         review: id,
-        user,
+        user: currUser,
       });
     }
   };
