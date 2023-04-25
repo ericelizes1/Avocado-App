@@ -2,6 +2,9 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getDocs, getFirestore } from 'firebase/firestore'
+import { getStorage, ref } from 'firebase/storage'
+import 'firebase/compat/storage'
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -23,7 +26,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-
+export const storage = getStorage(app);
 /*
 //collection references
 const usersCollection = db.collection('users');

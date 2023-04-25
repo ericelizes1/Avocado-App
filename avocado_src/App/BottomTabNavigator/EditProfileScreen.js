@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+
 import * as ImagePicker from 'expo-image-picker';
-import { firebase, storage, auth, db } from '../../firebase';
+import { firebase, auth, storage } from '../../firebase';
 import { collection, getDocs, addDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { v4 } from "uuid";
 
 export default function EditProfileScreen() {
@@ -14,24 +14,18 @@ export default function EditProfileScreen() {
   const username="undefined";
   const email = auth.currentUser.email;
 
-
   const [selectedImage, setSelectedImage] = useState(null);
+  const [photoURL, setPhotoURL] = useState(null);
 
   const handleGoBack = () => {
     navigation.goBack();
   };
 
-  const handleSaveProfile = () => {
-    if (selectedImage == null) return;
-    const imageRef = ref(storage, `images/${selectedImage.name + v4()}`);
-    uploadBytes(imageRef, selectedImage).then((snapshot) => {
-      getDownloadURL(snapshot.ref).then((url) => {
-        setImageUrls((prev) => [...prev, url]);
-      });
-      alert("Uploaded image!");
-    }).catch(alert("fuck"));
-    navigation.goBack();
-  }
+  useEffect(() => {
+    if (auth.currentUser?.photoURL) {
+      setPhotoURL(auth.currentUser.photoURL);
+    }
+  }, [auth.currentUser]);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -41,19 +35,33 @@ export default function EditProfileScreen() {
       quality: 1,
     });
 
-    console.log(result);
+    console.log("result is " + result);
 
     if (!result.cancelled) {
       setSelectedImage(result.uri);
     }
   };
 
-  uploadImage = async (uri) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-
-    var ref = firebase.storage().ref().child("my-image");
-    return ref.put(blob);
+  async function uploadImage (uri) {
+    console.log("saved image" + selectedImage);
+    navigation.goBack();
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function() {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function(e) {
+        console.log(e);
+        reject(new TypeError('Network request failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+    const ref = firebase.storage().ref().child(`images/${auth.currentUser.email}/${v4()}`);
+    const snapshot = ref.put(blob);
+    blob.close();
+    return await snapshot.ref.getDownloadURL();
   }
 
   return (
@@ -73,7 +81,8 @@ export default function EditProfileScreen() {
           <>
             {/*Image*/}
             <View style={{alignItems: 'center'}}>
-              <TouchableOpacity style={{padding: 10, }} onPress={pickImage}>    
+              <TouchableOpacity style={{padding: 10, }} onPress={pickImage}>
+
                 {selectedImage ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                     <Image source={{ uri: selectedImage }} style={{ width: 100, height: 100, borderRadius: 50 }} />  
@@ -108,7 +117,7 @@ export default function EditProfileScreen() {
         renderItem={({ item }) => null}
         ListFooterComponent={
           <View style={{alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+            <TouchableOpacity style={styles.saveButton} onPress={uploadImage}>
               <Text style={styles.buttonText}>Save profile</Text>
             </TouchableOpacity>
           </View>
