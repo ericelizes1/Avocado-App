@@ -139,11 +139,17 @@ export default function AddReviewScreen() {
     } else {
       dishId = existingDish.id;
     }
-  
+    
+    // Convert current date to a string in the format "m/dd/yyyy"
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    const dateString = `${month}/${day}/${year}`;
   
     // Save the review with the date, dish id as dish, rating, text, and curr user email as user
     await addDoc(reviewsCollection, {
-      date: new Date(),
+      date: dateString,
       dish: dishId,
       rating,
       text: review,

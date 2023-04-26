@@ -87,6 +87,8 @@ export default function HomeScreen() {
         };
       });
 
+      console.log(updatedReviewList)
+      console.log(reviewList);
       setReviewList(updatedReviewList);
       console.log(reviewList);
     } catch (error) {
