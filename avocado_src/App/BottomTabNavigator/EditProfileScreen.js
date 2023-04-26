@@ -4,14 +4,17 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import * as ImagePicker from 'expo-image-picker';
-import { firebase, auth, storage, db, doc } from '../../firebase';
-import { collection, getDoc, addDoc } from "firebase/firestore";
+import { firebase, auth, storage, db, doc, uploadBytes, ref, collection, getDoc, addDoc, updateDoc, getDownloadURL } from '../../firebase';
 import { v4 } from "uuid";
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
   const [bio, setBio] = useState('');
   const [username, setUsername] = useState("");
+  const [fname, setfName] = useState("");
+  const [lname, setlName] = useState("");
+
+  const [uploading, setUploading] = useState(false);
   const profileCollection = collection(db, 'profile');
   const email = auth.currentUser.email;
 
@@ -27,13 +30,15 @@ export default function EditProfileScreen() {
       //set username to the username of the current user from the profile collection based on the user's email as the id
       const docRef = doc(profileCollection, auth.currentUser.email);
       const docSnap = await getDoc(docRef);
-      setUsername(docSnap.data().name);
+      setUsername(docSnap.data().username);
     }
     getProfileName();
 
     if (auth.currentUser?.photoURL) {
       setPhotoURL(auth.currentUser.photoURL);
     }
+
+    
   }, [auth.currentUser]);
 
   const pickImage = async () => {
@@ -51,26 +56,41 @@ export default function EditProfileScreen() {
     }
   };
 
-  async function uploadImage (uri) {
-    console.log("saved image" + selectedImage);
-    navigation.goBack();
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function() {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function(e) {
-        console.log(e);
-        reject(new TypeError('Network request failed'));
-      };
-      xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
-    const ref = storage.ref().child(`images/${auth.currentUser.email}/${v4()}`);
-    const snapshot = ref.put(blob);
-    blob.close();
-    return await snapshot.ref.getDownloadURL();
+  const updateProfile = async () => {
+
+    try {
+      const docref = doc(db, "profile", email);
+      const data = { bio: bio, name: fname + ' ' + lname, username: username};
+      
+      await updateDoc(docref, data);
+      
+  }
+  catch (error) {
+      alert(error.message + " " + fname + " " + username + " " + bio + " ");
+
+  }
+      navigation.goBack();
+
+
+    if (selectedImage == null) return;
+    const uri = selectedImage;
+    let filename = uri.substring(uri.lastIndexOf('/') + 1);
+
+    extension = filename.split('.').pop();
+    const name = `${v4()}.${extension}`;
+    filename = name + Date.now(); + '.' + extension;
+
+    const storageRef = ref(storage, 'profile/' + filename);
+    const task = storageRef.putFile(uri);
+
+    try {
+      await task;
+      const url = await getDownloadURL(storageRef);
+      return url;
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
   }
 
   return (
@@ -90,8 +110,7 @@ export default function EditProfileScreen() {
           <>
             {/*Image*/}
             <View style={{alignItems: 'center'}}>
-              <TouchableOpacity style={{padding: 10, }} onPress={pickImage}>
-
+              <TouchableOpacity style={{padding: 15, }} onPress={pickImage}>
                 {selectedImage ? (
                   <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                     <Image source={{ uri: selectedImage }} style={{ width: 100, height: 100, borderRadius: 50 }} />  
@@ -108,17 +127,49 @@ export default function EditProfileScreen() {
               <Text style={{fontSize: 18, fontWeight: 'bold'}}>@{username}</Text>
               <Text style={{fontSize: 18, fontWeight: 'bold'}}>{email}</Text>
             </View>
-            {/*Bio*/}
+            {/*Bio & other details*/}
+            <View style={styles.inputContainer}>
+                <View>
+                    <Text style={styles.inputTitle}>Username</Text>
+                    <TextInput
+                        onChangeText={(username) => setUsername(username.trim())}
+                        value={username}
+                        style={styles.input}
+                    ></TextInput>
+                </View>
+
+                <View style={{ marginTop: 18 }}>
+                    <Text style={styles.inputTitle}>First Name</Text>
+                    <TextInput
+                        onChangeText={(fname) => setfName(fname.trim())}
+                        value={fname}
+                        style={styles.input}
+                    ></TextInput>
+                </View>
+
+                <View style={{ marginTop: 18 }}>
+                    <Text style={styles.inputTitle}>Last Name</Text>
+                    <TextInput
+                        onChangeText={(lname) => setlName(lname.trim())}
+                        value={lname}
+                        style={styles.input}
+                    ></TextInput>
+                </View>
+
+                <View style={{ marginTop: 18 }}>
+                  <Text style={styles.inputTitle}>Bio</Text>
+                  <TextInput
+                    style={[styles.input, styles.descriptionInput]}
+                    placeholder= {bio == '' ? "Type your bio here" : bio}
+                    onChangeText={text => setBio(text)}
+                    value={bio}
+                    multiline={true}
+                    numberOfLines={6}
+                  />
+                </View>
+            </View>
             <View style={{borderTopWidth: 1, marginTop: 10, borderColor: '#ccc', borderBottomWidth: 1, marginBottom: 10}}>
-              <Text style={{fontSize: 20, fontWeight: 'bold', padding: 10}}>Bio</Text>
-              <TextInput
-                style={[styles.input, styles.descriptionInput]}
-                placeholder= {bio == '' ? "Type your bio here" : bio}
-                onChangeText={text => setBio(text)}
-                value={bio}
-                multiline={true}
-                numberOfLines={6}
-              />
+
             </View>
           </>
         }
@@ -126,7 +177,7 @@ export default function EditProfileScreen() {
         renderItem={({ item }) => null}
         ListFooterComponent={
           <View style={{alignItems: 'center', justifyContent: 'center', flexDirection: 'row',}}>
-            <TouchableOpacity style={styles.saveButton} onPress={uploadImage}>
+            <TouchableOpacity style={styles.saveButton} onPress={updateProfile}>
               <Text style={styles.buttonText}>Save profile</Text>
             </TouchableOpacity>
           </View>
@@ -139,9 +190,9 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f2f2f2',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
   header: {
     backgroundColor: '#fff',
@@ -159,6 +210,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     paddingLeft: 10,
+  },
+  inputTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    paddingBottom: 10,
   },
   contentContainer: {
     flex: 1,
@@ -183,10 +239,11 @@ const styles = StyleSheet.create({
       paddingBottom: 10,
   },
   input: {
-    height: 40,
-    width: '100%',
-    borderColor: '#ccc',
-    padding: 10,
+    backgroundColor: 'white',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginTop: 5.
   },
   descriptionInput: {
       height: 100,
@@ -211,6 +268,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  inputContainer: {
+    width: '100%',
+    paddingLeft: 40,
+    paddingRight: 40,
+  },  
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
