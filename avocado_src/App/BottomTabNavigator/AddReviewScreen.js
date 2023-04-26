@@ -3,15 +3,35 @@ import { Image, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } 
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { db, auth } from '../../firebase';
+
 
 export default function AddReviewScreen() {
-
   const [dishList, setDishList] = useState([]);
   const [restaurantList, setRestaurantList] = useState([]);
+  const [rating, setRating] = useState(1);
+  const [review, setReview] = useState('');
+
+  const [searchRestaurantTerm, setSearchRestaurantTerm] = useState('');
+  const [autocompleteRestaurantData, setAutocompleteRestaurantData] = useState([]);
+
+  const [searchDishTerm, setSearchDishTerm] = useState('');
+  const [autocompleteDishData, setAutocompleteDishData] = useState([]);
+
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const [isRestaurantError, setIsRestaurantError] = useState(false);
+  const [isDishError, setIsDishError] = useState(false);
+  const [isReviewError, setIsReviewError] = useState(false);
+
+  const navigation = useNavigation();
   const dishCollection = collection(db, 'dish');
   const restaurantCollection = collection(db, 'restaurant');
+  const restaurants = restaurantList;
+  const dishes = dishList;
+
+  
 
   useEffect(() => {
     const getDishes = async () => {
@@ -36,25 +56,6 @@ export default function AddReviewScreen() {
     };
     getDishes();
   }, []);
-
-
-  const navigation = useNavigation();
-  const [rating, setRating] = useState(1);
-  const [review, setReview] = useState('');
-
-
-  const [searchRestaurantTerm, setSearchRestaurantTerm] = useState('');
-  const [autocompleteRestaurantData, setAutocompleteRestaurantData] = useState([]);
-
-  const [searchDishTerm, setSearchDishTerm] = useState('');
-  const [autocompleteDishData, setAutocompleteDishData] = useState([]);
-
-  const [selectedImage, setSelectedImage] = useState(null);
-
-
-  const restaurants = restaurantList;
-  
-  const dishes = dishList;
 
   const handleInputChange = (text, type) => {
     if (type === 'restaurant') {
@@ -99,8 +100,59 @@ export default function AddReviewScreen() {
   };
 
   const handlePost = () => {
+    setIsRestaurantError(searchRestaurantTerm === '');
+    setIsDishError(searchDishTerm === '');
+
+    // check if review is under 40 characters
+    setIsReviewError(review.length < 40);
+
+    if (searchRestaurantTerm === '' || searchDishTerm === '' || review === '') {
+      return;
+    }
+
+    // Send data to reviews database
+    addReview();
+
+    // Go back to previous screen
     navigation.goBack();
   };
+
+  const addReview = async () => {
+    const reviewsCollection = collection(db, 'reviews');
+  
+    // If there is no restaurant with the same name, create one with a name and an id, save the id
+    let restaurantId;
+    const existingRestaurant = restaurantList.find((restaurant) => restaurant.name.toLowerCase() === searchRestaurantTerm.toLowerCase());
+    if (!existingRestaurant) {
+      const newRestaurantRef = await addDoc(restaurantCollection, { name: searchRestaurantTerm });
+      restaurantId = newRestaurantRef.id;
+    } else {
+      restaurantId = existingRestaurant.id;
+    }
+  
+    // If there is no dish with the same name and restaurant id, create one with a name, a restaurant id as restaurant, dish id, save the id
+    let dishId;
+    const existingDish = dishList.find((dish) => dish.name.toLowerCase() === searchDishTerm.toLowerCase() && dish.restaurant === restaurantId);
+    if (!existingDish) {
+      const newDishRef = await addDoc(dishCollection, { name: searchDishTerm, restaurant: restaurantId });
+      dishId = newDishRef.id;
+    } else {
+      dishId = existingDish.id;
+    }
+  
+  
+    // Save the review with the date, dish id as dish, rating, text, and curr user email as user
+    await addDoc(reviewsCollection, {
+      date: new Date(),
+      dish: dishId,
+      rating,
+      text: review,
+      user: auth.currentUser.email
+    });
+  
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -151,6 +203,7 @@ export default function AddReviewScreen() {
                 )}
                 keyExtractor={(item) => item.id}
               />
+              {isRestaurantError && <Text style={styles.errorText}>Please select a restaurant</Text>}
             </View>
             {/*Dish*/}
             <View style={styles.dishContainer}>
@@ -173,6 +226,7 @@ export default function AddReviewScreen() {
                 )}
                 keyExtractor={(item) => item.id}
               />
+              {isDishError && <Text style={styles.errorText}>Please select a dish</Text>}
             </View>
             {/*Rating*/}
             <View style={styles.ratingContainer}>
@@ -232,6 +286,7 @@ export default function AddReviewScreen() {
                 numberOfLines={6}
               />
             </View>
+            {isReviewError && <Text style={styles.errorText}>Your review must be at least 40 characters</Text>}
             {/*Image*/}
             <View style={styles.dishContainer}>
               <Text style={styles.text}>Image (optional)</Text>
@@ -386,7 +441,14 @@ const styles = StyleSheet.create({
     color: "#FFF", 
     fontSize: 15, 
     fontWeight: "bold"
-  }
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 15,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10,
+  },
 
 });
 

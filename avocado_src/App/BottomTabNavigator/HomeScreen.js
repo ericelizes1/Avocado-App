@@ -19,10 +19,6 @@ export default function HomeScreen() {
   const dishCollection = collection(db, 'dish');
   const restaurantCollection = collection(db, 'restaurant');
 
-  const wait = (timeout) => {
-    return new Promise(resolve => setTimeout(resolve, timeout));
-  }
-
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     getReviews().then(() => setRefreshing(false));
