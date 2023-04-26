@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { auth, db } from '../../../firebase';
 import { useNavigation } from '@react-navigation/native';
+import { collection, doc, getDoc } from 'firebase/firestore';
 
 export default function HomeHeader() {
-  const [username, setUsername] = useState("username");
+  const [username, setUsername] = useState("");
   const navigation = useNavigation();
+  const profileCollection = collection(db, 'profile');
   
   const handleSignOut = () => {
     auth.signOut()
@@ -16,22 +18,16 @@ export default function HomeHeader() {
   }
 
   useEffect(() => {
-    const user = auth.currentUser;
-    
-    if (user) {
-            
-      /*
-      const unsubscribe = db.collection("profile").doc(user.uid)
-        .onSnapshot((doc) => {
-          if (doc.exists) {
-            setUsername(doc.data().username);
-          } else {
-            console.log("No such document!");
-          }
-        });
-      return unsubscribe;*/
-    }  
+    const getProfileName = async () => {
+      //set username to the username of the current user from the profile collection based on the user's email as the id
+      const docRef = doc(profileCollection, auth.currentUser.email);
+      const docSnap = await getDoc(docRef);
+      setUsername(docSnap.data().name);
+    }
+    getProfileName();
+      
   }, []);
+  
 
 
   return (
