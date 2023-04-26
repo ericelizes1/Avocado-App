@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/core'
 import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View } from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { auth } from '../firebase'
-import { db } from '../firebase'
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import { auth, db, collection, getDocs, addDoc, setDoc } from '../firebase'
+import firestore from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as addProfilePhoto from 'expo-image-picker';
+import { setDoc } from 'firebase/firestore'
 
 
 const RegisterScreen = () => {
@@ -37,12 +37,19 @@ const RegisterScreen = () => {
             alert("Please enter your email and password");
             return;
         }
+        const tst = {
+            username: username,
+            email: email,
+            password: password,
+        }
+
+        setDoc(collection(db, "users"), tst);
+
         createUserWithEmailAndPassword(auth, email, password)
         .then(userCredentials => {
             const user = userCredentials.user;
             console.log(user.email);
         }).catch(error => alert(error.message))
-         
     }
 
     const pickImage = async () => {
@@ -54,9 +61,9 @@ const RegisterScreen = () => {
         });
 
         if (!result.cancelled) {
-            setSelectedImage(result.uri, "test-image")
+            setSelectedImage(result.uri)
             .then(() => {
-              Alert.alert("Success!");
+              console.log("Success!");
             })
             .catch((error) => { //alerts can be deleted, for testing purposes
               Alert.alert(error);
