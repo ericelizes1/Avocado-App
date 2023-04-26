@@ -12,7 +12,6 @@ export default function EditProfileScreen() {
   const [bio, setBio] = useState('');
   const [username, setUsername] = useState("");
   const [fname, setfName] = useState("");
-  const [lname, setlName] = useState("");
 
   const [uploading, setUploading] = useState(false);
   const profileCollection = collection(db, 'profile');
@@ -31,6 +30,8 @@ export default function EditProfileScreen() {
       const docRef = doc(profileCollection, auth.currentUser.email);
       const docSnap = await getDoc(docRef);
       setUsername(docSnap.data().username);
+      setfName(docSnap.data().name);
+      setBio(docSnap.data().bio);
     }
     getProfileName();
 
@@ -60,7 +61,7 @@ export default function EditProfileScreen() {
 
     try {
       const docref = doc(db, "profile", email);
-      const data = { bio: bio, name: fname + ' ' + lname, username: username};
+      const data = { bio: bio, name: fname, username: username};
       
       await updateDoc(docref, data);
       
@@ -139,19 +140,10 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={{ marginTop: 18 }}>
-                    <Text style={styles.inputTitle}>First Name</Text>
+                    <Text style={styles.inputTitle}>Name</Text>
                     <TextInput
-                        onChangeText={(fname) => setfName(fname.trim())}
+                        onChangeText={(fname) => setfName(fname)}
                         value={fname}
-                        style={styles.input}
-                    ></TextInput>
-                </View>
-
-                <View style={{ marginTop: 18 }}>
-                    <Text style={styles.inputTitle}>Last Name</Text>
-                    <TextInput
-                        onChangeText={(lname) => setlName(lname.trim())}
-                        value={lname}
                         style={styles.input}
                     ></TextInput>
                 </View>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/core'
 import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View } from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, db, collection, getDocs, addDoc, setDoc, doc, storage, uploadBytes, getDownloadURL } from '../firebase'
+import { auth, db, collection, getDocs, ref, addDoc, setDoc, doc, storage, uploadBytes, getDownloadURL } from '../firebase'
 import firestore from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -13,7 +13,10 @@ const RegisterScreen = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
+    const [url, setUrl] = useState("");
     const [name, setName] = useState("");
+    const [uploading, setUploading] = useState(false);
+    const [transferred, setTransferred] = useState(0);
     const [selectedImage, setSelectedImage] = useState(null);
     const usersCollection = collection(db, 'users');
 
@@ -34,17 +37,17 @@ const RegisterScreen = () => {
             alert("Please fill in all the boxes");
             return;
         }
-        try {
-            const docref = doc(db, "profile", email);
-            const data = { bio: "empty bio", username: username, name: name };
-            
-            await setDoc(docref, data);
-            
-        }
-        catch (error) {
-            alert(error.message + " " + username + " " + email + " ");
+        const imageUrl = await uploadImage();
 
+        if (imageUrl == null) {
+            alert("Please upload an image");
+            return;
         }
+
+        const docref = doc(db, "profile", email);
+        const data = { bio: "empty bio", username: username, name: name, profilePic: imageUrl};
+        
+        await setDoc(docref, data);
 
         createUserWithEmailAndPassword(auth, email, password)
         .then(userCredentials => {
@@ -71,6 +74,48 @@ const RegisterScreen = () => {
             });
           }
     }
+
+    const uploadImage = async () => {
+        if (selectedImage == null) return null;
+            const uploadUri = selectedImage;
+            let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+
+            const extension = filename.split('.').pop();
+            const name = filename.split('.').slice(0, -1).join('.');
+            filename = name + Date.now() + '.' + extension;
+
+            setUploading(true);
+            setTransferred(0);
+
+            const storageRef = storage().ref("profile/" + email + "/" + filename);
+            const task = storageRef.putFile(uploadUri);
+
+            //set transferred state
+            task.on('state_changed', (taskSnapshot) => {
+                console.log(
+                    `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+                );
+
+                setTransferred(
+                    Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100,
+                );
+            });
+
+            try {
+                await task;
+                const url = await storageRef.getDownloadURL();
+
+                setUploading(false);
+                setSelectedImage(null);
+                Alert("Profile picture uploaded!");
+                return url;
+            }
+            catch (e) {
+                console.log(e);
+                return null;
+            }
+        };
+
 
     return (
         <View
