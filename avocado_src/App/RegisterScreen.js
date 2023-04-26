@@ -2,22 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/core'
 import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View } from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, db, collection, getDocs, addDoc, setDoc } from '../firebase'
+import { auth, db, collection, getDocs, addDoc, setDoc, doc, storage, uploadBytes, getDownloadURL } from '../firebase'
 import firestore from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as addProfilePhoto from 'expo-image-picker';
-import { setDoc } from 'firebase/firestore'
 
 
 const RegisterScreen = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
+    const [name, setName] = useState("");
     const [selectedImage, setSelectedImage] = useState(null);
-    const [fetching, setFetching] = useState(false);
-    const [error, setError] = useState("");
-    const [isValid, setValid] = useState(true);
     const usersCollection = collection(db, 'users');
 
     const navigation = useNavigation();
@@ -32,24 +29,28 @@ const RegisterScreen = () => {
             return unsub;
         }, [])
 
-    const handleSignUp = () => {
-        if (!email || !password) {
-            alert("Please enter your email and password");
+    const handleSignUp = async () => {
+        if (!email || !password || !username || !name) {
+            alert("Please fill in all the boxes");
             return;
         }
-        const tst = {
-            username: username,
-            email: email,
-            password: password,
+        try {
+            const docref = doc(db, "profile", email);
+            const data = { bio: "empty bio", username: username, name: name };
+            
+            await setDoc(docref, data);
+            
         }
+        catch (error) {
+            alert(error.message + " " + username + " " + email + " ");
 
-        setDoc(collection(db, "users"), tst);
+        }
 
         createUserWithEmailAndPassword(auth, email, password)
         .then(userCredentials => {
             const user = userCredentials.user;
             console.log(user.email);
-        }).catch(error => alert(error.message))
+        }).catch(error => alert(error.message + " " + username + " " + email + " "));
     }
 
     const pickImage = async () => {
@@ -106,7 +107,16 @@ const RegisterScreen = () => {
                     ></TextInput>
                 </View>
 
-                <View style={{ marginTop: 24 }}>
+                <View style={{ marginTop: 18 }}>
+                    <Text style={styles.inputTitle}>Full Name</Text>
+                    <TextInput
+                        onChangeText={(name) => setName(name)}
+                        value={name}
+                        style={styles.input}
+                    ></TextInput>
+                </View>
+
+                <View style={{ marginTop: 18 }}>
                     <Text style={styles.inputTitle}>Email Address</Text>
                     <TextInput
                         onChangeText={(email) => setEmail(email.trim())}
@@ -115,7 +125,7 @@ const RegisterScreen = () => {
                     ></TextInput>
                 </View>
 
-                <View style={{ marginTop: 24 }}>
+                <View style={{ marginTop: 18 }}>
                     <Text style={styles.inputTitle}>Password</Text>
                     <TextInput 
                         onChangeText={(password) => setPassword(password.trim())}

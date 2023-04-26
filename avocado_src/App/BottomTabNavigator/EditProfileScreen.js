@@ -4,14 +4,15 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import * as ImagePicker from 'expo-image-picker';
-import { firebase, auth, storage } from '../../firebase';
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import { firebase, auth, storage, db, doc } from '../../firebase';
+import { collection, getDoc, addDoc } from "firebase/firestore";
 import { v4 } from "uuid";
 
 export default function EditProfileScreen() {
   const navigation = useNavigation();
   const [bio, setBio] = useState('');
-  const username="undefined";
+  const [username, setUsername] = useState("");
+  const profileCollection = collection(db, 'profile');
   const email = auth.currentUser.email;
 
   const [selectedImage, setSelectedImage] = useState(null);
@@ -22,6 +23,14 @@ export default function EditProfileScreen() {
   };
 
   useEffect(() => {
+    const getProfileName = async () => {
+      //set username to the username of the current user from the profile collection based on the user's email as the id
+      const docRef = doc(profileCollection, auth.currentUser.email);
+      const docSnap = await getDoc(docRef);
+      setUsername(docSnap.data().name);
+    }
+    getProfileName();
+
     if (auth.currentUser?.photoURL) {
       setPhotoURL(auth.currentUser.photoURL);
     }
