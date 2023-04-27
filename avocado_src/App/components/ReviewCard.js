@@ -129,7 +129,7 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
           <Image source={require('./ReviewCard/guyfieri.png')} style={styles.profileImage} />
           <View style={styles.profileTextContainer}>
             <Text style={{fontWeight: "bold", fontSize: 18}}>{name}</Text>
-            <Text style={{color: "#727272", fontSize: 13}}>@{user}</Text>
+            <Text style={{color: "#727272", fontSize: 13}}>@{username}</Text>
           </View>
         </TouchableOpacity>
         <View style={styles.ratingsBarContainer}>
