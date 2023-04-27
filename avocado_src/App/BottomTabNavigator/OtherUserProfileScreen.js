@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
-import { auth, db, doc, getDoc, collection } from '../../firebase';
+import { auth } from '../../firebase';
+import { db } from '../../firebase';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import { collection, getDocs } from 'firebase/firestore';
 import NewPostButton from '../components/NewPostButton';
@@ -26,6 +27,59 @@ export default function ProfileScreen({ route}) {
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
   const [isFollowed, setIsFollowed] = useState(false);
+
+  useEffect(() => {
+    console.log(email);
+    console.log(username);
+    const getProfileData = async () => {
+      const reviewData = await getDocs(reviewCollection);
+      const profileData = await getDocs(profileCollection);
+      const dishData = await getDocs(dishCollection);
+      const restaurantData = await getDocs(restaurantCollection);
+      const filteredProfileData = profileData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })).filter((item) => item !== null && item.id === email);
+      const filteredReviewData = reviewData.docs
+        .map((doc) =>({
+          ...doc.data(),
+          id: doc.id,})
+        )
+        .filter((item) => item !== null && item.user === email);
+
+        filteredReviewData.forEach((review) => {
+          const dish = dishData.docs.find((dish) => dish.id === review.dish);
+          const restaurant = restaurantData.docs.find(
+            (restaurant) => restaurant.id === dish.data().restaurant
+          );
+          review.dishName = dish.data().name;
+          review.restaurantName = restaurant.data().name;
+        });
+
+
+        setProfileList(filteredProfileData);
+        setReviewList(filteredReviewData);
+        console.log(filteredProfileData);
+        console.log(filteredReviewData);
+    }
+
+    getProfileData();
+  }, []);
+
+  const renderItem = ({ item }) => (
+    <ReviewCard
+        id={item.id}
+        rating={item.rating}
+        text={item.text}
+        user={item.user}
+        photo={item.photo || null}
+        name={username}
+        date={item.date}
+        dish={item.dishName}
+        restaurant={item.restaurantName}
+      />
+  );
+
 
   const handleFollow = () => {
     setIsFollowed(!isFollowed);
