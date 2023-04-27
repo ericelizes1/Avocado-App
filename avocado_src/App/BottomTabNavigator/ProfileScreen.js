@@ -23,9 +23,10 @@ export default function ProfileScreen() {
   const [displayName, setDisplayName] = useState("");
   const [dishList, setDishList] = useState([]);
   const [restaurantList, setRestaurantList] = useState([]);
+  const [numFollowing, setNumFollowing] = useState(0);
+  const [numFollowers, setNumFollowers] = useState(0);
+  const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const [profileImage, setProfileImage] = useState("");
-  const numFollowing = 2;
-  const numFollowers = 5;
   const navigation = useNavigation();
 
   const onRefresh = React.useCallback(() => {
@@ -36,8 +37,31 @@ export default function ProfileScreen() {
   useFocusEffect(
     React.useCallback(() => {
       getProfileData();
+      getFollowsData();
     }, [])
   );
+  
+  const getFollowsData = async () => {
+    try {
+      const followsCollection = collection(db, 'followers');
+      const followsData = await getDocs(followsCollection);
+
+      const filteredFollowersData = followsData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })).filter((item) => item !== null && item.follows === auth.currentUser.email);
+      setNumFollowers(filteredFollowersData.length);
+
+      const filteredFollowingData = followsData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })).filter((item) => item !== null && item.follower === auth.currentUser.email);
+      setNumFollowing(filteredFollowingData.length);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const getProfileData = async () => {
     try {
@@ -67,14 +91,18 @@ export default function ProfileScreen() {
           console.log("Request failed");
         };  
 
-      const filteredProfileData = profileData.docs.map((doc) => doc.data());
+      const filteredProfileData = profileData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })).filter((item) => item !== null && item.id === auth.currentUser.email);     
+      
       const filteredReviewData = reviewData.docs
         .map((doc) =>({
           ...doc.data(),
           id: doc.id,})
         )
         .filter((item) => item !== null && item.user === auth.currentUser.email);
-
+      
       // Map dishes to reviews based on dish id
       filteredReviewData.forEach((review) => {
         const dish = dishData.docs.find((dish) => dish.id === review.dish);
@@ -94,6 +122,7 @@ export default function ProfileScreen() {
         review.userName = profile ? profile.data().name : "Unknown User";
       });
 
+      setBioText(filteredProfileData[0].bio);
       setProfileList(filteredProfileData);
       setReviewList(filteredReviewData);
     } catch (error) {

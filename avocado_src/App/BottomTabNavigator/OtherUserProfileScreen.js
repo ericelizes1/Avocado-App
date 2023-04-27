@@ -2,25 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
-import { auth, doc, getDoc } from '../../firebase';
+import { auth, getDoc } from '../../firebase';
 import { db } from '../../firebase';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
+
+
 
 export default function ProfileScreen({route}) {
   const username = route.params.username;
   const name = route.params.name;
   const email = route.params.email;
   const profilePict = route.params.profilePic;
-  const bioText = useState("");
-  const [numFollowing, setNumFollowing] = useState(2);
-  const [numFollowers, setNumFollowers] = useState(5);
+  const [bioText, setBioText] = useState("");
+  const [numFollowing, setNumFollowing] = useState(0);
+  const [numFollowers, setNumFollowers] = useState(0);
   const reviewCollection = collection(db, 'reviews');
   const profileCollection = collection(db, 'profile');
   const dishCollection = collection(db, 'dish');
   const restaurantCollection = collection(db, 'restaurant');
+  const followsCollection = collection(db, 'followers');
   const [dishList, setDishList] = useState([]);
   const [restaurantList, setRestaurantList] = useState([]);
   const [profileList , setProfileList] = useState([]);
@@ -33,64 +36,91 @@ export default function ProfileScreen({route}) {
   useEffect(() => {
     console.log(email);
     console.log(username);
-    const getProfileData = async () => {
-      const reviewData = await getDocs(reviewCollection);
-      const profileData = await getDocs(profileCollection);
-      const dishData = await getDocs(dishCollection);
-      const restaurantData = await getDocs(restaurantCollection);
-      const docRef = doc(profileCollection, email);
-      const docSnap = await getDoc(docRef);
-
-      // This can be downloaded directly:
-      let xhr = new XMLHttpRequest();
-
-      xhr.responseType = 'text';
-      xhr.open('GET', docSnap.data().profilePic);
-      xhr.send();
-
-      xhr.onload = function(event) {
-        if (xhr.status != 200) {
-          // analyze HTTP status of the response
-          console.log(`Error ${xhr.status}: ${xhr.statusText}`);
-        } else { // show the result
-          console.log(`Received ${event.loaded} bytes`);
-          setProfileImage(xhr.response);
-        }
-      };
-
-      xhr.onerror = function() {
-        console.log("Request failed");
-      };           
-
-      const filteredProfileData = profileData.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      })).filter((item) => item !== null && item.id === email);
-      const filteredReviewData = reviewData.docs
-        .map((doc) =>({
-          ...doc.data(),
-          id: doc.id,})
-        )
-        .filter((item) => item !== null && item.user === email);
-
-        filteredReviewData.forEach((review) => {
-          const dish = dishData.docs.find((dish) => dish.id === review.dish);
-          const restaurant = restaurantData.docs.find(
-            (restaurant) => restaurant.id === dish.data().restaurant
-          );
-          review.dishName = dish.data().name;
-          review.restaurantName = restaurant.data().name;
-        });
-
-
-        setProfileList(filteredProfileData);
-        setReviewList(filteredReviewData);
-        console.log(filteredProfileData);
-        console.log(filteredReviewData);
-    }
 
     getProfileData();
+    getFollowData();
   }, []);
+
+  const getProfileData = async () => {
+    const reviewData = await getDocs(reviewCollection);
+    const profileData = await getDocs(profileCollection);
+    const dishData = await getDocs(dishCollection);
+    const restaurantData = await getDocs(restaurantCollection);
+    const docRef = doc(profileCollection, email);
+    const docSnap = await getDoc(docRef);
+
+    // This can be downloaded directly:
+    let xhr = new XMLHttpRequest();
+
+    xhr.responseType = 'text';
+    xhr.open('GET', docSnap.data().profilePic);
+    xhr.send();
+
+    xhr.onload = function(event) {
+      if (xhr.status != 200) {
+        // analyze HTTP status of the response
+        console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+      } else { // show the result
+        console.log(`Received ${event.loaded} bytes`);
+        setProfileImage(xhr.response);
+      }
+    };
+
+    xhr.onerror = function() {
+      console.log("Request failed");
+    };           
+
+  const filteredProfileData = profileData.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  })).filter((item) => item !== null && item.id === email);
+  const filteredReviewData = reviewData.docs
+    .map((doc) =>({
+      ...doc.data(),
+      id: doc.id,})
+    )
+    .filter((item) => item !== null && item.user === email);
+
+    filteredReviewData.forEach((review) => {
+      const dish = dishData.docs.find((dish) => dish.id === review.dish);
+      const restaurant = restaurantData.docs.find(
+        (restaurant) => restaurant.id === dish.data().restaurant
+      );
+      review.dishName = dish.data().name;
+      review.restaurantName = restaurant.data().name;
+    });
+
+    setBioText(filteredProfileData[0].bio);
+    setProfileList(filteredProfileData);
+    setReviewList(filteredReviewData);
+    console.log(filteredProfileData);
+    console.log(filteredReviewData);
+  }
+
+  const getFollowData = async () => {
+    const followsData = await getDocs(followsCollection);
+    const filteredFollowsData = followsData.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })).filter((item) => item !== null && item.follower === auth.currentUser?.email && item.follows === email);
+    if (filteredFollowsData.length > 0) {
+      setIsFollowed(true);
+    } else {
+      setIsFollowed(false);
+    }
+
+    const filteredFollowersData = followsData.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })).filter((item) => item !== null && item.follows === email);
+    setNumFollowers(filteredFollowersData.length);
+
+    const filteredFollowingData = followsData.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })).filter((item) => item !== null && item.follower === email);
+    setNumFollowing(filteredFollowingData.length);
+  }
 
   const renderItem = ({ item }) => (
     <ReviewCard
@@ -107,9 +137,31 @@ export default function ProfileScreen({route}) {
   );
 
 
-  const handleFollow = () => {
-    setIsFollowed(!isFollowed);
+  const handleFollow = async () => {
+    const followsData = await getDocs(followsCollection);
+    const existingFollow = followsData.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })).find((item) => item !== null && item.follower === auth.currentUser?.email && item.follows === email);
+
+
+    if (existingFollow) {
+      setIsFollowed(false);
+      setNumFollowers(numFollowers - 1);
+      await deleteDoc(doc(followsCollection, existingFollow.id));
+    } else {
+      setIsFollowed(true);
+      setNumFollowers(numFollowers + 1);
+
+      // Add a new document in collection "followers"
+      await addDoc(collection(db, "followers"), {
+        follower: auth.currentUser?.email,
+        follows: email,
+      });
+    }
   };
+
+
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -128,26 +180,7 @@ export default function ProfileScreen({route}) {
   const handleEditProfile = () => {
     navigation.navigate("EditProfile");
   }
-  /*
-  useEffect(() => {
-    // Retrieve the user's bio from the Firebase database
-    db.collection("profile").doc(auth.currentUser?.uid).get()
-      .then(doc => {
-        if (doc.exists) {
-          setBioText(doc.data().bio || "");
-        } else {
-          console.log("No such document!");
-        }
-      })
-      .catch(error => {
-        console.log("Error getting document:", error);
-      });  
-  }, []);
-  */
-  
-  //          <Text style={styles.displayName}>{displayName}</Text>
-  //<Text>Name: incomplete </Text>
-  //<Text>Email: {auth.currentUser?.email}</Text>
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -199,8 +232,8 @@ export default function ProfileScreen({route}) {
               </View>
             </View>
             <Text style={styles.bioText}>{bioText}</Text>
-            <View style={{width: '100%', alignItems: 'center', borderTopWidth: 1, borderColor: '#ccc', borderBottomWidth: 1, padding: 10}}>
-              <Text style={{fontSize: 20, fontWeight: 'bold',}}>Your Reviews</Text>
+            <View style={{width: '100%', alignItems: 'center', borderTopWidth: 1, borderColor: '#ccc', borderBottomWidth: 1, padding: 10, marginTop: 10}}>
+              <Text style={{fontSize: 20, fontWeight: 'bold',}}>Reviews</Text>
             </View>
           </>
         }
@@ -303,5 +336,4 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingLeft: 5,
   },
-  
 });
