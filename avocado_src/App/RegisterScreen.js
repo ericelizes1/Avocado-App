@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/core'
 import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View, Platform } from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, db, collection, getDocs, ref, storage, addDoc, setDoc, doc, uploadBytes, getDownloadURL } from '../firebase'
+import { auth, db, collection, getDocs, ref, storage, addDoc, setDoc, doc, uploadString, getDownloadURL } from '../firebase'
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -10,10 +10,7 @@ const RegisterScreen = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
-    const [url, setUrl] = useState("");
     const [name, setName] = useState("");
-    const [uploading, setUploading] = useState(false);
-    const [transferred, setTransferred] = useState(0);
     const [selectedImage, setSelectedImage] = useState(null);
 
     const navigation = useNavigation();
@@ -71,18 +68,13 @@ const RegisterScreen = () => {
         const filename = selectedImage.substring(selectedImage.lastIndexOf('/') + 1);
         const storageRef = ref(storage, email + '/' + filename);
 
-        setUploading(true);
-        setTransferred(0);
 
-        uploadBytes(storageRef, selectedImage).then((snapshot) => {
+        uploadString(storageRef, selectedImage).then((snapshot) => {
             console.log('Uploaded a blob or file!');
           });
         //set transferred state
 
-        setUploading(false);
         const url = await getDownloadURL(storageRef, selectedImage);
-
-        setSelectedImage(null);
         return url;
     };
 
