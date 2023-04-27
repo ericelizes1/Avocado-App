@@ -162,6 +162,9 @@ export default function AddReviewScreen() {
 
   const uploadImage = async () => {
     console.log(selectedImage);
+    if (!selectedImage) {
+      return '';
+    }
     const filename = selectedImage.substring(selectedImage.lastIndexOf('/') + 1);
     const storageRef = ref(storage, dishId + '/' + filename);
 
