@@ -15,6 +15,27 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
   const likesCollection = collection(db, 'Likes');
   const [isLiked, setIsLiked] = useState(false);
   const [numLikes, setNumLikes] = useState(0);
+  const [profileList, setProfileList] = useState([]);
+  const [username, setUsername] = useState('');
+  const email = user;
+  const image = photo;
+
+
+
+  useEffect(() => {
+    const getProfileData = async () => {
+      const profileData = await getDocs(profileCollection);
+      const filteredProfileData = profileData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })).filter((item) => item !== null && item.id === user);
+      setProfileList(filteredProfileData);
+      filteredProfileData.forEach((profile) => {
+        setUsername(profile.username);
+      });
+    };
+    getProfileData();
+  }, []);
 
   const navigation = useNavigation();
 
@@ -70,9 +91,12 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
   
 
   const handleProfile = () => {
-    console.log('test')
     navigation.navigate('OtherUserProfile', {
-      animation: 'slide_from_bottom',
+      username: username,
+      email: user,
+      name: name,
+      image: image,
+
     });
   };
 

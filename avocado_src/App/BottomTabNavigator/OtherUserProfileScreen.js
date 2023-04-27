@@ -73,7 +73,7 @@ export default function ProfileScreen({ route}) {
         text={item.text}
         user={item.user}
         photo={item.photo || null}
-        name={username}
+        name={name}
         date={item.date}
         dish={item.dishName}
         restaurant={item.restaurantName}
