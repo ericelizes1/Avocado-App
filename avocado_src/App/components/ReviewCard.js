@@ -7,7 +7,7 @@ import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../../firebase';
 import { auth } from '../../firebase';
-import { collection, getDocs, addDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function ReviewCard({id, rating, text, user, photo, name, date, dish, restaurant}) {
@@ -18,13 +18,16 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
   const [profileList, setProfileList] = useState([]);
   const [username, setUsername] = useState('');
   const email = user;
-  const image = photo;
+  const [profileImage, setProfileImage] = useState("");
 
 
 
   useEffect(() => {
     const getProfileData = async () => {
-      const profileData = await getDocs(profileCollection);
+      const docRef = doc(profileCollection, auth.currentUser.email);
+      const docSnap = await getDoc(docRef);
+      const profileData = await getDocs(profileCollection);  
+
       const filteredProfileData = profileData.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
@@ -32,6 +35,26 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
       setProfileList(filteredProfileData);
       filteredProfileData.forEach((profile) => {
         setUsername(profile.username);
+
+        //fetches the profile picture from the database
+        let xhr = new XMLHttpRequest();
+        xhr.responseType = 'text';
+        xhr.open('GET', profile.profilePic);
+        xhr.send();
+        xhr.onload = function(event) {
+          if (xhr.status != 200) {
+            // analyze HTTP status of the response
+            console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+          } else { // show the result
+            console.log(`Received ${event.loaded} bytes`);
+            setProfileImage(xhr.response);
+          }
+        };
+
+        xhr.onerror = function() {
+          console.log("Request failed");
+        };
+
       });
     };
     getProfileData();
@@ -95,7 +118,7 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
       username: username,
       email: user,
       name: name,
-      image: image,
+      profilePhoto: profileImage,
 
     });
   };
@@ -126,7 +149,13 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
       {/*Profile Bar*/}
       <View style={styles.profileBarContainer}>
         <TouchableOpacity style={styles.profileButtonContainer} onPress={handleProfile}>
-          <Image source={require('./ReviewCard/guyfieri.png')} style={styles.profileImage} />
+          {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.profileImage} />  
+          ) : (
+            <View style={{ backgroundColor: '#ccc', width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }}>
+              <Ionicons name="person-circle" size={45} color="#fff" />
+            </View>
+          )}
           <View style={styles.profileTextContainer}>
             <Text style={{fontWeight: "bold", fontSize: 18}}>{name}</Text>
             <Text style={{color: "#727272", fontSize: 13}}>@{username}</Text>
