@@ -103,7 +103,7 @@ export default function EditProfileScreen() {
     const uri = selectedImage;
     let filename = uri.substring(uri.lastIndexOf('/') + 1);
 
-    extension = filename.split('.').pop();
+    const extension = filename.split('.').pop();
     const name = `${v4()}.${extension}`;
     filename = name + Date.now(); + '.' + extension;
 

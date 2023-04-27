@@ -12,6 +12,7 @@ const RegisterScreen = () => {
     const [username, setUsername] = useState("");
     const [name, setName] = useState("");
     const [selectedImage, setSelectedImage] = useState(null);
+    var imageUrl;
 
     const navigation = useNavigation();
 
@@ -26,16 +27,18 @@ const RegisterScreen = () => {
         }, [])
 
     const handleSignUp = async () => {
+
         if (!email || !password || !username || !name) {
             alert("Please fill in all the boxes");
             return;
         }
-        const imageUrl = await uploadImage();
 
-        if (imageUrl == null) {
+        if (selectedImage == null) {
             alert("Please upload an image" + selectedImage);
             return;
         }
+
+        imageUrl = await uploadImage();
 
         const docref = doc(db, "profile", email);
         const data = { bio: "empty bio", username: username, name: name, profilePic: imageUrl};
@@ -58,7 +61,7 @@ const RegisterScreen = () => {
         });
 
         if (!result.cancelled) {
-            setSelectedImage(result.assets[0].uri);
+            setSelectedImage(result.uri);
           }
 
     }
@@ -69,7 +72,7 @@ const RegisterScreen = () => {
         const storageRef = ref(storage, email + '/' + filename);
 
 
-        uploadString(storageRef, selectedImage).then((snapshot) => {
+        await uploadString(storageRef, selectedImage).then((snapshot) => {
             console.log('Uploaded a blob or file!');
           });
         //set transferred state
