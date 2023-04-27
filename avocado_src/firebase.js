@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getDocs, getFirestore, collection, addDoc, doc, setDoc } from 'firebase/firestore'
+import { getDocs, getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc} from 'firebase/firestore'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import 'firebase/compat/storage'
 
@@ -28,7 +28,7 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 
-export { getDocs, ref, addDoc, setDoc, collection, getStorage, app, doc, uploadBytes, getDownloadURL };
+export { getDocs, ref, addDoc, setDoc, collection, getStorage, app, doc, getDoc, updateDoc, uploadBytes, getDownloadURL };
 /*
 //collection references
 const usersCollection = db.collection('users');

@@ -22,7 +22,7 @@ export default function HomeHeader() {
       //set username to the username of the current user from the profile collection based on the user's email as the id
       const docRef = doc(profileCollection, auth.currentUser.email);
       const docSnap = await getDoc(docRef);
-      setUsername(docSnap.data().name);
+      setUsername(docSnap.data().username);
     }
     getProfileName();
       
