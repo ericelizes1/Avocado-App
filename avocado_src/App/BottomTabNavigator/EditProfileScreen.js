@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import * as ImagePicker from 'expo-image-picker';
-import { firebase, auth, storage, db, doc, uploadBytes, ref, collection, getDoc, addDoc, updateDoc, getDownloadURL } from '../../firebase';
+import { firebase, auth, storage, db, doc, uploadString, ref, collection, getDoc, addDoc, updateDoc, getDownloadURL } from '../../firebase';
 import { v4 } from "uuid";
 
 export default function EditProfileScreen() {
@@ -12,13 +12,12 @@ export default function EditProfileScreen() {
   const [bio, setBio] = useState('');
   const [username, setUsername] = useState("");
   const [fname, setfName] = useState("");
-
-  const [uploading, setUploading] = useState(false);
   const profileCollection = collection(db, 'profile');
   const email = auth.currentUser.email;
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [photoURL, setPhotoURL] = useState(null);
+  var url;
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -32,15 +31,37 @@ export default function EditProfileScreen() {
       setUsername(docSnap.data().username);
       setfName(docSnap.data().name);
       setBio(docSnap.data().bio);
+            // This can be downloaded directly:
+        let xhr = new XMLHttpRequest();
+
+        xhr.responseType = 'text';
+        xhr.open('GET', docSnap.data().profilePic);
+        xhr.send();
+
+        xhr.onload = function(event) {
+          if (xhr.status != 200) {
+            // analyze HTTP status of the response
+            console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+          } else { // show the result
+            console.log(`Received ${event.loaded} bytes`);
+            setSelectedImage(xhr.response);
+          }
+        };
+
+        xhr.onerror = function() {
+          console.log("Request failed");
+        };           
     }
     getProfileName();
 
     if (auth.currentUser?.photoURL) {
       setPhotoURL(auth.currentUser.photoURL);
     }
-
+    console.log(selectedImage);
+    console.log(fname);
     
   }, [auth.currentUser]);
+
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -58,10 +79,15 @@ export default function EditProfileScreen() {
   };
 
   const updateProfile = async () => {
+    if (!username || !fname) {
+      alert("Username/Name cannot be empty");
+      return;
+    }
+    const imageUrl = await uploadImage();
 
     try {
       const docref = doc(db, "profile", email);
-      const data = { bio: bio, name: fname, username: username};
+      const data = { bio: bio, name: fname, username: username, profilePic: imageUrl};
       
       await updateDoc(docref, data);
       
@@ -77,7 +103,7 @@ export default function EditProfileScreen() {
     const uri = selectedImage;
     let filename = uri.substring(uri.lastIndexOf('/') + 1);
 
-    extension = filename.split('.').pop();
+    const extension = filename.split('.').pop();
     const name = `${v4()}.${extension}`;
     filename = name + Date.now(); + '.' + extension;
 
@@ -93,6 +119,21 @@ export default function EditProfileScreen() {
       return null;
     }
   }
+
+  const uploadImage = async () => {
+    console.log(selectedImage);
+    const filename = selectedImage.substring(selectedImage.lastIndexOf('/') + 1);
+    const storageRef = ref(storage, email + '/' + filename);
+
+    uploadString(storageRef, selectedImage).then((snapshot) => {
+        console.log('Uploaded a blob or file!');
+      });
+    //set transferred state
+
+    const url = await getDownloadURL(storageRef, selectedImage);
+    return url;
+};
+
 
   return (
     <View style={styles.container}>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
-import { auth } from '../../firebase';
+import { auth, doc, getDoc } from '../../firebase';
 import { db } from '../../firebase';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
@@ -10,10 +10,12 @@ import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 
 
-export default function ProfileScreen({ route}) {
+
+export default function ProfileScreen({route}) {
   const username = route.params.username;
   const name = route.params.name;
   const email = route.params.email;
+  const profilePict = route.params.profilePic;
   const [bioText, setBioText] = useState("");
   const [numFollowing, setNumFollowing] = useState(0);
   const [numFollowers, setNumFollowers] = useState(0);
@@ -26,6 +28,7 @@ export default function ProfileScreen({ route}) {
   const [restaurantList, setRestaurantList] = useState([]);
   const [profileList , setProfileList] = useState([]);
   const [reviewList, setReviewList] = useState([]);
+  const [profileImage, setProfileImage] = useState(null);
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
   const [isFollowed, setIsFollowed] = useState(false);
@@ -43,6 +46,30 @@ export default function ProfileScreen({ route}) {
     const profileData = await getDocs(profileCollection);
     const dishData = await getDocs(dishCollection);
     const restaurantData = await getDocs(restaurantCollection);
+      const docRef = doc(profileCollection, email);
+      const docSnap = await getDoc(docRef);
+
+      // This can be downloaded directly:
+      let xhr = new XMLHttpRequest();
+
+      xhr.responseType = 'text';
+      xhr.open('GET', docSnap.data().profilePic);
+      xhr.send();
+
+      xhr.onload = function(event) {
+        if (xhr.status != 200) {
+          // analyze HTTP status of the response
+          console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+        } else { // show the result
+          console.log(`Received ${event.loaded} bytes`);
+          setProfileImage(xhr.response);
+        }
+      };
+
+      xhr.onerror = function() {
+        console.log("Request failed");
+      };           
+
     const filteredProfileData = profileData.docs.map((doc) => ({
       ...doc.data(),
       id: doc.id,
@@ -173,7 +200,13 @@ export default function ProfileScreen({ route}) {
         ListHeaderComponent={
           <>
             <View style={styles.basicInfoContainer}>
-              <Image source={profileImagePath} style={styles.profileImage} />
+              {profileImage ? (
+                  <Image source={{ uri: profileImage }} style={styles.profileImage} />  
+              ) : (
+                <View style={{ backgroundColor: '#ccc', width: 90, height: 90, borderRadius: 75, margin:20, justifyContent: 'center', alignItems: 'center' }}>
+                  <Ionicons name="person-circle" size={50} color="#fff" />
+                </View>
+              )}
               <View style={{flexDirection: 'column'}}>
                 <View style={styles.basicInfoTextContainer}>
                   <View style={styles.statisticContainer}>
@@ -290,6 +323,7 @@ const styles = StyleSheet.create({
     height: 90,
     width: 90,
     borderRadius: 75,
+    margin:20
   },
   followed: {
     backgroundColor: '#ccc',
@@ -302,5 +336,4 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingLeft: 5,
   },
-  
 });

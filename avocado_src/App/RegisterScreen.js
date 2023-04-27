@@ -1,24 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/core'
-import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View } from 'react-native'
+import { StyleSheet, Text, TextInput, TouchableOpacity, Image, useWindowDimensions, View, Platform } from 'react-native'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { auth, db, collection, getDocs, ref, addDoc, setDoc, doc, storage, uploadBytes, getDownloadURL } from '../firebase'
-import firestore from 'firebase/firestore';
+import { auth, db, collection, getDocs, ref, storage, addDoc, setDoc, doc, uploadString, getDownloadURL } from '../firebase'
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import * as addProfilePhoto from 'expo-image-picker';
-
 
 const RegisterScreen = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
-    const [url, setUrl] = useState("");
     const [name, setName] = useState("");
-    const [uploading, setUploading] = useState(false);
-    const [transferred, setTransferred] = useState(0);
     const [selectedImage, setSelectedImage] = useState(null);
-    const usersCollection = collection(db, 'users');
+    var imageUrl;
 
     const navigation = useNavigation();
 
@@ -33,16 +27,18 @@ const RegisterScreen = () => {
         }, [])
 
     const handleSignUp = async () => {
+
         if (!email || !password || !username || !name) {
             alert("Please fill in all the boxes");
             return;
         }
-        const imageUrl = await uploadImage();
 
-        if (imageUrl == null) {
-            alert("Please upload an image");
+        if (selectedImage == null) {
+            alert("Please upload an image" + selectedImage);
             return;
         }
+
+        imageUrl = await uploadImage();
 
         const docref = doc(db, "profile", email);
         const data = { bio: "empty bio", username: username, name: name, profilePic: imageUrl};
@@ -65,56 +61,25 @@ const RegisterScreen = () => {
         });
 
         if (!result.cancelled) {
-            setSelectedImage(result.uri)
-            .then(() => {
-              console.log("Success!");
-            })
-            .catch((error) => { //alerts can be deleted, for testing purposes
-              Alert.alert(error);
-            });
+            setSelectedImage(result.uri);
           }
+
     }
 
     const uploadImage = async () => {
-        if (selectedImage == null) return null;
-            const uploadUri = selectedImage;
-            let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+        console.log(selectedImage);
+        const filename = selectedImage.substring(selectedImage.lastIndexOf('/') + 1);
+        const storageRef = ref(storage, email + '/' + filename);
 
-            const extension = filename.split('.').pop();
-            const name = filename.split('.').slice(0, -1).join('.');
-            filename = name + Date.now() + '.' + extension;
 
-            setUploading(true);
-            setTransferred(0);
+        await uploadString(storageRef, selectedImage).then((snapshot) => {
+            console.log('Uploaded a blob or file!');
+          });
+        //set transferred state
 
-            const storageRef = storage().ref("profile/" + email + "/" + filename);
-            const task = storageRef.putFile(uploadUri);
-
-            //set transferred state
-            task.on('state_changed', (taskSnapshot) => {
-                console.log(
-                    `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
-                );
-
-                setTransferred(
-                    Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) * 100,
-                );
-            });
-
-            try {
-                await task;
-                const url = await storageRef.getDownloadURL();
-
-                setUploading(false);
-                setSelectedImage(null);
-                Alert("Profile picture uploaded!");
-                return url;
-            }
-            catch (e) {
-                console.log(e);
-                return null;
-            }
-        };
+        const url = await getDownloadURL(storageRef, selectedImage);
+        return url;
+    };
 
 
     return (

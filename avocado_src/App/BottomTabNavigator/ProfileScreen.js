@@ -3,7 +3,8 @@ import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity, R
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
 import { auth } from '../../firebase';
-import { db } from '../../firebase';
+import { Ionicons } from '@expo/vector-icons';
+import { db, getDoc, doc } from '../../firebase';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 import { getDocs, collection } from 'firebase/firestore';
@@ -25,6 +26,7 @@ export default function ProfileScreen() {
   const [numFollowing, setNumFollowing] = useState(0);
   const [numFollowers, setNumFollowers] = useState(0);
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
+  const [profileImage, setProfileImage] = useState("");
   const navigation = useNavigation();
 
   const onRefresh = React.useCallback(() => {
@@ -63,10 +65,31 @@ export default function ProfileScreen() {
 
   const getProfileData = async () => {
     try {
+      const docRef = doc(profileCollection, auth.currentUser.email);
+      const docSnap = await getDoc(docRef);
       const dishData = await getDocs(dishCollection);
       const restaurantData = await getDocs(restaurantCollection);
       const profileData = await getDocs(profileCollection);
       const reviewData = await getDocs(reviewsCollection);
+      
+      //fetches the profile picture from the database  
+        let xhr = new XMLHttpRequest();
+        xhr.responseType = 'text';
+        xhr.open('GET', docSnap.data().profilePic);
+        xhr.send();
+        xhr.onload = function(event) {
+          if (xhr.status != 200) {
+            // analyze HTTP status of the response
+            console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+          } else { // show the result
+            console.log(`Received ${event.loaded} bytes`);
+            setProfileImage(xhr.response);
+          }
+        };
+
+        xhr.onerror = function() {
+          console.log("Request failed");
+        };  
 
       const filteredProfileData = profileData.docs.map((doc) => ({
         ...doc.data(),
@@ -141,7 +164,15 @@ export default function ProfileScreen() {
         ListHeaderComponent={
           <>
             <View style={styles.basicInfoContainer}>
-              <Image source={profileImagePath} style={styles.profileImage} />
+              {profileImage ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+                    <Image source={{ uri: profileImage }} style={styles.profileImage} />  
+                  </View>
+                ) : (
+                  <View style={{ backgroundColor: '#ccc', width: 90, height: 90, borderRadius: 75, justifyContent: 'center', alignItems: 'center' }}>
+                    <Ionicons name="person-circle" size={50} color="#fff" />
+                  </View>
+                )}
               <View style={{flexDirection: 'column'}}>
                 <View style={styles.basicInfoTextContainer}>
                   <View style={styles.statisticContainer}>
