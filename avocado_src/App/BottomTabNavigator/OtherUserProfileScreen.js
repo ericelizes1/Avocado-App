@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FlatList, View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/core';
-import { auth, doc, getDoc } from '../../firebase';
+import { auth, getDoc } from '../../firebase';
 import { db } from '../../firebase';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
@@ -46,55 +46,55 @@ export default function ProfileScreen({route}) {
     const profileData = await getDocs(profileCollection);
     const dishData = await getDocs(dishCollection);
     const restaurantData = await getDocs(restaurantCollection);
-      const docRef = doc(profileCollection, email);
-      const docSnap = await getDoc(docRef);
+    const docRef = doc(profileCollection, email);
+    const docSnap = await getDoc(docRef);
 
-      // This can be downloaded directly:
-      let xhr = new XMLHttpRequest();
+    // This can be downloaded directly:
+    let xhr = new XMLHttpRequest();
 
-      xhr.responseType = 'text';
-      xhr.open('GET', docSnap.data().profilePic);
-      xhr.send();
+    xhr.responseType = 'text';
+    xhr.open('GET', docSnap.data().profilePic);
+    xhr.send();
 
-      xhr.onload = function(event) {
-        if (xhr.status != 200) {
-          // analyze HTTP status of the response
-          console.log(`Error ${xhr.status}: ${xhr.statusText}`);
-        } else { // show the result
-          console.log(`Received ${event.loaded} bytes`);
-          setProfileImage(xhr.response);
-        }
-      };
+    xhr.onload = function(event) {
+      if (xhr.status != 200) {
+        // analyze HTTP status of the response
+        console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+      } else { // show the result
+        console.log(`Received ${event.loaded} bytes`);
+        setProfileImage(xhr.response);
+      }
+    };
 
-      xhr.onerror = function() {
-        console.log("Request failed");
-      };           
+    xhr.onerror = function() {
+      console.log("Request failed");
+    };           
 
-    const filteredProfileData = profileData.docs.map((doc) => ({
+  const filteredProfileData = profileData.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  })).filter((item) => item !== null && item.id === email);
+  const filteredReviewData = reviewData.docs
+    .map((doc) =>({
       ...doc.data(),
-      id: doc.id,
-    })).filter((item) => item !== null && item.id === email);
-    const filteredReviewData = reviewData.docs
-      .map((doc) =>({
-        ...doc.data(),
-        id: doc.id,})
-      )
-      .filter((item) => item !== null && item.user === email);
+      id: doc.id,})
+    )
+    .filter((item) => item !== null && item.user === email);
 
-      filteredReviewData.forEach((review) => {
-        const dish = dishData.docs.find((dish) => dish.id === review.dish);
-        const restaurant = restaurantData.docs.find(
-          (restaurant) => restaurant.id === dish.data().restaurant
-        );
-        review.dishName = dish.data().name;
-        review.restaurantName = restaurant.data().name;
-      });
+    filteredReviewData.forEach((review) => {
+      const dish = dishData.docs.find((dish) => dish.id === review.dish);
+      const restaurant = restaurantData.docs.find(
+        (restaurant) => restaurant.id === dish.data().restaurant
+      );
+      review.dishName = dish.data().name;
+      review.restaurantName = restaurant.data().name;
+    });
 
-      setBioText(filteredProfileData[0].bio);
-      setProfileList(filteredProfileData);
-      setReviewList(filteredReviewData);
-      console.log(filteredProfileData);
-      console.log(filteredReviewData);
+    setBioText(filteredProfileData[0].bio);
+    setProfileList(filteredProfileData);
+    setReviewList(filteredReviewData);
+    console.log(filteredProfileData);
+    console.log(filteredReviewData);
   }
 
   const getFollowData = async () => {
