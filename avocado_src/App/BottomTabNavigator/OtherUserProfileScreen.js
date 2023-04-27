@@ -5,18 +5,81 @@ import { useNavigation } from '@react-navigation/core';
 import { auth } from '../../firebase';
 import { db } from '../../firebase';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
-
+import { collection, getDocs } from 'firebase/firestore';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 
-export default function ProfileScreen() {
-  const username = 'username';
-  const bioText = "This is the text in my bio on my profile. It is a lot of text and it word wraps.";
+export default function ProfileScreen({ route}) {
+  const username = route.params.username;
+  const name = route.params.name;
+  const email = route.params.email;
+  const bioText = useState("");
   const [numFollowing, setNumFollowing] = useState(2);
   const [numFollowers, setNumFollowers] = useState(5);
+  const reviewCollection = collection(db, 'reviews');
+  const profileCollection = collection(db, 'profile');
+  const dishCollection = collection(db, 'dish');
+  const restaurantCollection = collection(db, 'restaurant');
+  const [dishList, setDishList] = useState([]);
+  const [restaurantList, setRestaurantList] = useState([]);
+  const [profileList , setProfileList] = useState([]);
+  const [reviewList, setReviewList] = useState([]);
   const profileImagePath = require('../components/ReviewCard/guyfieri.png');
   const navigation = useNavigation();
   const [isFollowed, setIsFollowed] = useState(false);
+
+  useEffect(() => {
+    console.log(email);
+    console.log(username);
+    const getProfileData = async () => {
+      const reviewData = await getDocs(reviewCollection);
+      const profileData = await getDocs(profileCollection);
+      const dishData = await getDocs(dishCollection);
+      const restaurantData = await getDocs(restaurantCollection);
+      const filteredProfileData = profileData.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })).filter((item) => item !== null && item.id === email);
+      const filteredReviewData = reviewData.docs
+        .map((doc) =>({
+          ...doc.data(),
+          id: doc.id,})
+        )
+        .filter((item) => item !== null && item.user === email);
+
+        filteredReviewData.forEach((review) => {
+          const dish = dishData.docs.find((dish) => dish.id === review.dish);
+          const restaurant = restaurantData.docs.find(
+            (restaurant) => restaurant.id === dish.data().restaurant
+          );
+          review.dishName = dish.data().name;
+          review.restaurantName = restaurant.data().name;
+        });
+
+
+        setProfileList(filteredProfileData);
+        setReviewList(filteredReviewData);
+        console.log(filteredProfileData);
+        console.log(filteredReviewData);
+    }
+
+    getProfileData();
+  }, []);
+
+  const renderItem = ({ item }) => (
+    <ReviewCard
+        id={item.id}
+        rating={item.rating}
+        text={item.text}
+        user={item.user}
+        photo={item.photo || null}
+        name={username}
+        date={item.date}
+        dish={item.dishName}
+        restaurant={item.restaurantName}
+      />
+  );
+
 
   const handleFollow = () => {
     setIsFollowed(!isFollowed);
@@ -26,22 +89,7 @@ export default function ProfileScreen() {
     navigation.goBack();
   }
   
-  const data = [
-    { id: '1', title: 'Review 1', description: 'This is review 1' },
-    { id: '2', title: 'Review 2', description: 'This is review 2' },
-    { id: '3', title: 'Review 3', description: 'This is review 3' },
-    { id: '4', title: 'Review 4', description: 'This is review 4' },
-    { id: '5', title: 'Review 5', description: 'This is review 5' },
-    { id: '6', title: 'Review 6', description: 'This is review 6' },
-    { id: '7', title: 'Review 7', description: 'This is review 7' },
-    { id: '8', title: 'Review 8', description: 'This is review 8' },
-    { id: '9', title: 'Review 9', description: 'This is review 9' },
-    { id: '10', title: 'Review 10', description: 'This is review 10' },
-  ];
-
-  const renderItem = ({ item }) => (
-    <ReviewCard/>
-  );
+  const data = reviewList;
 
   const handleSignOut = () => {
     auth.signOut()

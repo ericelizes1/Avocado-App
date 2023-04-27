@@ -129,6 +129,7 @@ function ReviewList(props) {
           (profile) => profile.id === review.user
         );
         const userName = userProfile ? userProfile.name : 'Unknown User';
+        const email = userProfile ? userProfile.id : 'Unknown Email';
 
         const dish = filteredDishData.find(
           (dish) => dish.id === review.dish
@@ -145,6 +146,7 @@ function ReviewList(props) {
           ...review,
           userProfile,
           userName,
+          email,
           dish,
           dishName,
           restaurantName,
@@ -259,6 +261,7 @@ function UserList(props) {
       username={item.username}
       name={item.name}
       image={item.image}
+      email={item.id}
     />
   );
 
