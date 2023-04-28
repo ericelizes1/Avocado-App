@@ -4,8 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { collection, getDocs, addDoc } from 'firebase/firestore';
-import { db, auth } from '../../firebase';
-
+import { auth, storage, db, uploadString, ref, getDownloadURL } from '../../firebase';
 
 export default function AddReviewScreen() {
   const [dishList, setDishList] = useState([]);
@@ -30,6 +29,7 @@ export default function AddReviewScreen() {
   const restaurantCollection = collection(db, 'restaurant');
   const restaurants = restaurantList;
   const dishes = dishList;
+  var dishId;
 
   
 
@@ -131,7 +131,6 @@ export default function AddReviewScreen() {
     }
   
     // If there is no dish with the same name and restaurant id, create one with a name, a restaurant id as restaurant, dish id, save the id
-    let dishId;
     const existingDish = dishList.find((dish) => dish.name.toLowerCase() === searchDishTerm.toLowerCase() && dish.restaurant === restaurantId);
     if (!existingDish) {
       const newDishRef = await addDoc(dishCollection, { name: searchDishTerm, restaurant: restaurantId });
@@ -146,19 +145,38 @@ export default function AddReviewScreen() {
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const year = today.getFullYear();
     const dateString = `${month}/${day}/${year}`;
-  
+
+    const imageUrl = await uploadImage();
     // Save the review with the date, dish id as dish, rating, text, and curr user email as user
     await addDoc(reviewsCollection, {
       date: dateString,
       dish: dishId,
       rating,
       text: review,
-      user: auth.currentUser.email
+      user: auth.currentUser.email,
+      image: imageUrl
     });
   
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
+  const uploadImage = async () => {
+    console.log(selectedImage);
+    if (!selectedImage) {
+      return '';
+    }
+    const filename = selectedImage.substring(selectedImage.lastIndexOf('/') + 1);
+    const storageRef = ref(storage, dishId + '/' + filename);
+
+
+    await uploadString(storageRef, selectedImage).then((snapshot) => {
+        console.log('Uploaded a blob or file!');
+      });
+    //set transferred state
+
+    const url = await getDownloadURL(storageRef, selectedImage);
+    return url;
+};
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({

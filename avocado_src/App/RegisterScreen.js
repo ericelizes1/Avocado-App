@@ -34,7 +34,7 @@ const RegisterScreen = () => {
         }
 
         if (selectedImage == null) {
-            alert("Please upload an image" + selectedImage);
+            alert("Please upload an image");
             return;
         }
 
