@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { db, getDoc, doc } from '../../firebase';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
-import { getDocs, collection } from 'firebase/firestore';
+import { getDocs, collection, Timestamp } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 
 
@@ -124,17 +124,45 @@ export default function ProfileScreen() {
 
       setBioText(filteredProfileData[0].bio);
       setProfileList(filteredProfileData);
-      setReviewList(filteredReviewData);
+      setReviewList(sortByDate(filteredReviewData));
     } catch (error) {
       console.error(error);
     }
   };
 
+  function sortByDate(updatedReviewList) {
+    return updatedReviewList.sort(function(a, b) {
+      var aSeconds = a.date.seconds;
+      var bSeconds = b.date.seconds;
+      var aNanoseconds = a.date.nanoseconds;
+      var bNanoseconds = b.date.nanoseconds;
   
+      if (aSeconds > bSeconds) {
+        return -1;
+      } else if (aSeconds < bSeconds) {
+        return 1;
+      } else {
+        if (aNanoseconds > bNanoseconds) {
+          return -1;
+        } else if (aNanoseconds < bNanoseconds) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    });
+  }
+    
   const data = reviewList;
 
   const renderItem = ({ item }) => {
-    console.log(item.restaurantName)
+    const date = item.date;
+
+    const timestamp = new Timestamp(
+      date.seconds,
+      date.nanoseconds
+    ).toDate();
+
     return (
       <ReviewCard
         id={item.id}
@@ -143,7 +171,7 @@ export default function ProfileScreen() {
         user={item.user}
         photo={item.photo || null}
         name={item.userName}
-        date={item.date}
+        date={timestamp}
         dish={item.dishName}
         restaurant={item.restaurantName}
       />

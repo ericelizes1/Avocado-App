@@ -4,7 +4,7 @@ import NewPostButton from '../components/NewPostButton';
 import { db } from '../../firebase';
 import { getDocs } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
-import { collection } from 'firebase/firestore';
+import { collection, Timestamp } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 
 
@@ -88,24 +88,44 @@ export default function HomeScreen() {
       });
       
       console.log(updatedReviewList);
-      setReviewList(sortReviewsByDate(updatedReviewList));
+      setReviewList(sortByDate(updatedReviewList));
       console.log(reviewList);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const sortReviewsByDate = (list) => {
-    list.sort(function(a, b) {
-      var dateA = new Date(a.date.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/, "$2/$1/$3"));
-      var dateB = new Date(b.date.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/, "$2/$1/$3"));
-      return dateB - dateA;
+  function sortByDate(updatedReviewList) {
+    return updatedReviewList.sort(function(a, b) {
+      var aSeconds = a.date.seconds;
+      var bSeconds = b.date.seconds;
+      var aNanoseconds = a.date.nanoseconds;
+      var bNanoseconds = b.date.nanoseconds;
+  
+      if (aSeconds > bSeconds) {
+        return -1;
+      } else if (aSeconds < bSeconds) {
+        return 1;
+      } else {
+        if (aNanoseconds > bNanoseconds) {
+          return -1;
+        } else if (aNanoseconds < bNanoseconds) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
     });
-    return list;
-  }
+  }  
   
   const renderItem = ({ item }) => {
-    console.log(item.restaurantName)
+    const date = item.date;
+
+    const timestamp = new Timestamp(
+      date.seconds,
+      date.nanoseconds
+    ).toDate();
+
     return (
       <ReviewCard
         id={item.id}
@@ -114,7 +134,7 @@ export default function HomeScreen() {
         user={item.user}
         photo={item.photo || null}
         name={item.userName}
-        date={item.date}
+        date={timestamp}
         dish={item.dishName}
         restaurant={item.restaurantName}
       />

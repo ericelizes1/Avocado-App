@@ -3,7 +3,7 @@ import { Image, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } 
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, storage, db, uploadString, ref, getDownloadURL } from '../../firebase';
 
 export default function AddReviewScreen() {
@@ -149,7 +149,7 @@ export default function AddReviewScreen() {
     const imageUrl = await uploadImage();
     // Save the review with the date, dish id as dish, rating, text, and curr user email as user
     await addDoc(reviewsCollection, {
-      date: dateString,
+      date: serverTimestamp(),
       dish: dishId,
       rating,
       text: review,

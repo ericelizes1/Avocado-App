@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/core';
 import { auth, getDoc } from '../../firebase';
 import { db } from '../../firebase';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
-import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, Timestamp } from 'firebase/firestore';
 import NewPostButton from '../components/NewPostButton';
 import ReviewCard from '../components/ReviewCard';
 
@@ -92,11 +92,34 @@ export default function ProfileScreen({route}) {
 
     setBioText(filteredProfileData[0].bio);
     setProfileList(filteredProfileData);
-    setReviewList(filteredReviewData);
+    setReviewList(sortByDate(filteredReviewData));
     console.log(filteredProfileData);
     console.log(filteredReviewData);
   }
 
+  function sortByDate(updatedReviewList) {
+    return updatedReviewList.sort(function(a, b) {
+      var aSeconds = a.date.seconds;
+      var bSeconds = b.date.seconds;
+      var aNanoseconds = a.date.nanoseconds;
+      var bNanoseconds = b.date.nanoseconds;
+  
+      if (aSeconds > bSeconds) {
+        return -1;
+      } else if (aSeconds < bSeconds) {
+        return 1;
+      } else {
+        if (aNanoseconds > bNanoseconds) {
+          return -1;
+        } else if (aNanoseconds < bNanoseconds) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    });
+  }
+  
   const getFollowData = async () => {
     const followsData = await getDocs(followsCollection);
     const filteredFollowsData = followsData.docs.map((doc) => ({
@@ -122,19 +145,28 @@ export default function ProfileScreen({route}) {
     setNumFollowing(filteredFollowingData.length);
   }
 
-  const renderItem = ({ item }) => (
-    <ReviewCard
+  const renderItem = ({ item }) => {
+    const date = item.date;
+
+    const timestamp = new Timestamp(
+      date.seconds,
+      date.nanoseconds
+    ).toDate();
+
+    return (
+      <ReviewCard
         id={item.id}
         rating={item.rating}
         text={item.text}
         user={item.user}
         photo={item.photo || null}
-        name={name}
-        date={item.date}
+        name={item.userName}
+        date={timestamp}
         dish={item.dishName}
         restaurant={item.restaurantName}
       />
-  );
+    );
+  };
 
 
   const handleFollow = async () => {

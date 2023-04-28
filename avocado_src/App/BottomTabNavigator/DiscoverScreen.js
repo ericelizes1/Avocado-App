@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vect
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { SearchBar } from 'react-native-elements';
 import { db } from '../../firebase';
-import { getDocs, collection } from 'firebase/firestore';
+import { getDocs, collection, Timestamp } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 
 import UserCard from '../components/UserCard';
@@ -153,7 +153,7 @@ function ReviewList(props) {
         };
       });
 
-      setReviewList(updatedReviewList);
+      setReviewList(sortByDate(updatedReviewList));
       console.log("Review List: " + reviewList);
       console.log("Dish List: " + dishList);
       console.log("Restaurant List: " + restaurantList);
@@ -162,7 +162,29 @@ function ReviewList(props) {
     }
   };
 
-
+  function sortByDate(updatedReviewList) {
+    return updatedReviewList.sort(function(a, b) {
+      var aSeconds = a.date.seconds;
+      var bSeconds = b.date.seconds;
+      var aNanoseconds = a.date.nanoseconds;
+      var bNanoseconds = b.date.nanoseconds;
+  
+      if (aSeconds > bSeconds) {
+        return -1;
+      } else if (aSeconds < bSeconds) {
+        return 1;
+      } else {
+        if (aNanoseconds > bNanoseconds) {
+          return -1;
+        } else if (aNanoseconds < bNanoseconds) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    });
+  }
+  
   const filteredData = reviewList.filter((review) => {
     const searchTerm = props.searchTerm.toLowerCase();
     const userName = review.userName.toLowerCase();
@@ -179,7 +201,13 @@ function ReviewList(props) {
   });
 
   const renderItem = ({ item }) => {
-    console.log("Restaurant Name: " + item.restaurantName);
+    const date = item.date;
+
+    const timestamp = new Timestamp(
+      date.seconds,
+      date.nanoseconds
+    ).toDate();
+
     return (
       <ReviewCard
         id={item.id}
@@ -188,7 +216,7 @@ function ReviewList(props) {
         user={item.user}
         photo={item.photo || null}
         name={item.userName}
-        date={item.date}
+        date={timestamp}
         dish={item.dishName}
         restaurant={item.restaurantName}
       />
