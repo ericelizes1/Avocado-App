@@ -23,6 +23,7 @@ export default function AddReviewScreen() {
   const [isRestaurantError, setIsRestaurantError] = useState(false);
   const [isDishError, setIsDishError] = useState(false);
   const [isReviewError, setIsReviewError] = useState(false);
+  const [isPhotoError, setIsPhotoError] = useState(false);
 
   const navigation = useNavigation();
   const dishCollection = collection(db, 'dish');
@@ -102,6 +103,7 @@ export default function AddReviewScreen() {
   const handlePost = () => {
     setIsRestaurantError(searchRestaurantTerm === '');
     setIsDishError(searchDishTerm === '');
+    setIsPhotoError(selectedImage === null);
 
     // check if review is under 40 characters
     setIsReviewError(review.length < 40);
@@ -310,7 +312,7 @@ export default function AddReviewScreen() {
                 numberOfLines={6}
               />
             </View>
-            {isReviewError && <Text style={styles.errorText}>Your review must be at least 40 characters</Text>}
+            {isReviewError && <Text style={styles.errorText}>You must include a review that is less than 40 characters</Text>}
             {/*Image*/}
             <View style={styles.dishContainer}>
               <Text style={styles.text}>Image (optional)</Text>
@@ -329,6 +331,8 @@ export default function AddReviewScreen() {
                 )}      
               </TouchableOpacity>
             </View>
+            {isPhotoError && <Text style={styles.errorText}>You must upload an image</Text>}
+
           </>
         }
         data={[]}
