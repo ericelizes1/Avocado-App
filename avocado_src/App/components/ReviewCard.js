@@ -3,6 +3,7 @@ import { StatusBar, } from 'expo-status-bar';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Entypo } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { db } from '../../firebase';
@@ -10,54 +11,106 @@ import { auth } from '../../firebase';
 import { collection, getDocs, addDoc, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 
-export default function ReviewCard({id, rating, text, user, photo, name, date, dish, restaurant}) {
+export default function ReviewCard({id, rating, text, user, image, name, date, dish, restaurant}) {
   const profileCollection = collection(db, 'profile');
+  const dishCollection = collection(db, 'dish');
   const likesCollection = collection(db, 'Likes');
+  const reviewsCollection = collection(db, 'reviews');
+  const restaurantCollection = collection(db, 'restaurant');
   const [isLiked, setIsLiked] = useState(false);
   const [numLikes, setNumLikes] = useState(0);
   const [profileList, setProfileList] = useState([]);
   const [username, setUsername] = useState('');
   const email = user;
   const [profileImage, setProfileImage] = useState("");
-
+  const [reviewPic, setReviewPic] = useState("");
 
 
   useEffect(() => {
     const getProfileData = async () => {
-      const docRef = doc(profileCollection, auth.currentUser.email);
-      const docSnap = await getDoc(docRef);
-      const profileData = await getDocs(profileCollection);  
+      try {
+        const docRef = doc(profileCollection, auth.currentUser.email);
+        const docSnap = await getDoc(docRef);
+        const dishData = await getDocs(dishCollection);
+        const profileData = await getDocs(profileCollection);
+        const reviewData = await getDocs(reviewsCollection);  
+        const restaurantData = await getDocs(restaurantCollection);
 
-      const filteredProfileData = profileData.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      })).filter((item) => item !== null && item.id === user);
-      setProfileList(filteredProfileData);
-      filteredProfileData.forEach((profile) => {
-        setUsername(profile.username);
 
-        //fetches the profile picture from the database
-        let xhr = new XMLHttpRequest();
-        xhr.responseType = 'text';
-        xhr.open('GET', profile.profilePic);
-        xhr.send();
-        xhr.onload = function(event) {
-          if (xhr.status != 200) {
-            // analyze HTTP status of the response
-            console.log(`Error ${xhr.status}: ${xhr.statusText}`);
-          } else { // show the result
-            console.log(`Received ${event.loaded} bytes`);
-            setProfileImage(xhr.response);
-          }
-        };
+        const filteredProfileData = profileData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        })).filter((item) => item !== null && item.id === user);
+        setProfileList(filteredProfileData);
 
-        xhr.onerror = function() {
-          console.log("Request failed");
-        };
+        filteredProfileData.forEach((profile) => {
+          setUsername(profile.username);
 
-      });
+          //fetches the profile picture from the database
+          let xhr = new XMLHttpRequest();
+          xhr.responseType = 'text';
+          xhr.open('GET', profile.profilePic);
+          xhr.send();
+          xhr.onload = function(event) {
+            if (xhr.status != 200) {
+              // analyze HTTP status of the response
+              console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+            } else { // show the result
+              console.log(`Received ${event.loaded} bytes`);
+              setProfileImage(xhr.response);
+            }
+          };
+
+          xhr.onerror = function() {
+            console.log("Request failed");
+          };
+
+        });
+
+        const filteredReviewData = reviewData.docs.map((doc) =>({
+          ...doc.data(),
+          id: doc.id,})
+        )
+        .filter((item) => item !== null && item.user === user);
+      
+
+        filteredReviewData.forEach((review) => {
+
+          let xhr = new XMLHttpRequest();
+          xhr.responseType = 'text';
+          xhr.open('GET', review.image);
+          xhr.send();
+          xhr.onload = function(event) {
+            if (xhr.status != 200) {
+              // analyze HTTP status of the response
+              console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+            } else { // show the result
+              console.log(`Received ${event.loaded} bytes`);
+              setReviewPic(xhr.response);
+            }
+          };
+
+          xhr.onerror = function() {
+            console.log("Request failed");
+          };
+
+          /*
+          const dish = dishData.docs.find((dish) => dish.id === review.dish);
+          const restaurant = restaurantData.docs.find(
+            (restaurant) => restaurant.id === dish.data().restaurant
+          );
+          review.dishName = dish ? dish.data().name : "Unknown Dish";
+          review.restaurantName = restaurant
+            ? restaurant.data().name
+            : "Unknown Restaurant";
+            */
+        });
+      } catch (error) {
+        console.error(error);
+      }
     };
     getProfileData();
+
   }, []);
 
   const navigation = useNavigation();
@@ -216,7 +269,13 @@ export default function ReviewCard({id, rating, text, user, photo, name, date, d
 
       {/*Image*/}
       <View style={styles.imageContainer}>
-        <Image source={require('./ReviewCard/chickenparm.jpg')} style={styles.reviewImage} />  
+        {reviewPic ? (
+            <Image source={{ uri: reviewPic }} style={styles.reviewImage} />  
+        ) : (
+            <View style={{ backgroundColor: '#ccc', width: '100%', height: 200, justifyContent: 'center', alignItems: 'center' }}>
+              <Entypo name="download" size={24} color='#808080'/>
+            </View>
+        )}
       </View>
 
       {/*Interact Bar*/}
@@ -295,5 +354,6 @@ const styles = StyleSheet.create({
     height: 200,
     width: '100%',
     borderRadius: 10,
+    
   },
 });

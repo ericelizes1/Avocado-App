@@ -125,7 +125,7 @@ export default function EditProfileScreen() {
     const filename = selectedImage.substring(selectedImage.lastIndexOf('/') + 1);
     const storageRef = ref(storage, email + '/' + filename);
 
-    uploadString(storageRef, selectedImage).then((snapshot) => {
+    await uploadString(storageRef, selectedImage).then((snapshot) => {
         console.log('Uploaded a blob or file!');
       });
     //set transferred state

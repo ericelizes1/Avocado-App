@@ -40,7 +40,7 @@ const LoginScreen = () => {
         signInWithEmailAndPassword(auth, email, password)
         .then(userCredentials => {
             const user = userCredentials.user;
-            alert("Logged in as: " + user.email);
+            console.log(user.email);
         }).catch(error => alert(error.message))
     } 
 
