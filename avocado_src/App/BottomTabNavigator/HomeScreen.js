@@ -86,16 +86,24 @@ export default function HomeScreen() {
           restaurantName,
         };
       });
-
-      console.log(updatedReviewList)
-      console.log(reviewList);
-      setReviewList(updatedReviewList);
+      
+      console.log(updatedReviewList);
+      setReviewList(sortReviewsByDate(updatedReviewList));
       console.log(reviewList);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const sortReviewsByDate = (list) => {
+    list.sort(function(a, b) {
+      var dateA = new Date(a.date.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/, "$2/$1/$3"));
+      var dateB = new Date(b.date.replace(/(\d{1,2})\/(\d{1,2})\/(\d{4})/, "$2/$1/$3"));
+      return dateB - dateA;
+    });
+    return list;
+  }
+  
   const renderItem = ({ item }) => {
     console.log(item.restaurantName)
     return (
