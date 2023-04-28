@@ -169,7 +169,7 @@ export default function ProfileScreen() {
         rating={item.rating}
         text={item.text}
         user={item.user}
-        image={item.image || null}
+        photo={item.photo || null}
         name={item.userName}
         date={timestamp}
         dish={item.dishName}
