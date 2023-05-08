@@ -11,6 +11,7 @@ export default function UserCard(props) {
       name: props.name,
       image: props.image,
       email: props.email,
+      photo : props.photo,
     });
   };
 
