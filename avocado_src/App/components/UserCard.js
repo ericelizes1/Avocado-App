@@ -31,7 +31,6 @@ export default function UserCard(props) {
           ...doc.data(),
           id: doc.id,
         })).filter((item) => item !== null && item.id === props.email);
-        setProfileList(filteredProfileData);
 
         filteredProfileData.forEach((profile) => {
 
@@ -68,7 +67,7 @@ export default function UserCard(props) {
     <TouchableOpacity style={styles.container} onPress={handleProfile}>
       <View style={styles.imageContainer}>
         {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />  
+            <Image source={{ uri: profileImage }} style={{ width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }} />  
         ) : (
             <View style={{ backgroundColor: '#ccc', width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }}>
               <Ionicons name="person-circle" size={45} color="#fff" />
