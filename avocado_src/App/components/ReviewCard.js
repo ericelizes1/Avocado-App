@@ -231,7 +231,7 @@ export default function ReviewCard({id, rating, text, user, image, name, date, d
   }
 
 
-
+  console.log(reviewPic);
   return (
     <View style={styles.container}>
       {/*Profile Bar*/}
@@ -268,15 +268,12 @@ export default function ReviewCard({id, rating, text, user, image, name, date, d
       </View>
 
       {/*Image*/}
-      <View style={styles.imageContainer}>
-        {reviewPic ? (
-            <Image source={{ uri: reviewPic }} style={styles.reviewImage} />  
-        ) : (
-            <View style={{ backgroundColor: '#ccc', width: '100%', height: 200, justifyContent: 'center', alignItems: 'center' }}>
-              <Entypo name="download" size={24} color='#808080'/>
-            </View>
-        )}
-      </View>
+      {reviewPic && (
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: reviewPic }} style={styles.reviewImage} />  
+        </View>
+      )}
+
 
       {/*Interact Bar*/}
       <View style={{flexDirection: 'row',

@@ -157,7 +157,7 @@ export default function HomeScreen() {
         }
       />
       <View style={styles.floatingButtonContainer}>
-        <NewPostButton />
+        <NewPostButton refresh={onRefresh}/>
       </View>
     </View>
   );

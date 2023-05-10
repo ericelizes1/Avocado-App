@@ -230,7 +230,7 @@ export default function ProfileScreen() {
       />
       <StatusBar style="auto" />
       <View style={styles.floatingButtonContainer}>
-        <NewPostButton/>
+        <NewPostButton refresh={onRefresh}/>
       </View>
     </View>
   );
