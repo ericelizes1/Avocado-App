@@ -29,8 +29,6 @@ export default function ProfileScreen({ route}) {
   const [isFollowed, setIsFollowed] = useState(false);
 
   useEffect(() => {
-    console.log(email);
-    console.log(username);
     getProfileData();
     getFollowData();
   }, []);
@@ -44,6 +42,7 @@ export default function ProfileScreen({ route}) {
       ...doc.data(),
       id: doc.id,
     })).filter((item) => item !== null && item.id === email);
+    console.log(filteredProfileData);
     const filteredReviewData = reviewData.docs
       .map((doc) =>({
         ...doc.data(),
@@ -56,8 +55,11 @@ export default function ProfileScreen({ route}) {
       const restaurant = restaurantData.docs.find(
         (restaurant) => restaurant.id === dish.data().restaurant
       );
+      const profile = profileData.docs.find((profile) => profile.id === review.user);
       review.dishName = dish.data().name;
       review.restaurantName = restaurant.data().name;
+      review.userName = profile ? profile.data().name : "Unknown User";
+
     });
 
     filteredProfileData.forEach((profile) => {
@@ -82,7 +84,7 @@ export default function ProfileScreen({ route}) {
     });
 
     console.log(filteredProfileData);
-    console.log(filteredReviewData);
+    setBioText(filteredProfileData[0].bio);
     setProfileList(filteredProfileData);
     setReviewList(sortByDate(filteredReviewData));
   }
@@ -141,7 +143,9 @@ export default function ProfileScreen({ route}) {
       date.seconds,
       date.nanoseconds
     ).toDate();
-
+    
+    console.log(item)
+    
     return (
       <ReviewCard
         id={item.id}
@@ -231,7 +235,7 @@ export default function ProfileScreen({ route}) {
         <View style={{ flex: 1 }} />
       </View>
       <FlatList
-        data={data}
+        data={reviewList}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}

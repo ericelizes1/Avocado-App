@@ -121,7 +121,6 @@ export default function ReviewCard({id, rating, text, user, image, name, date, d
   );  
 
   const getTimeAgo = (timestamp) => {
-    console.log(timestamp);
     const now = new Date();
     const then = timestamp;
   

@@ -6,6 +6,7 @@ import { getDocs } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { collection, Timestamp } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function HomeScreen() {
@@ -18,6 +19,7 @@ export default function HomeScreen() {
   const reviewsCollection = collection(db, 'reviews');
   const dishCollection = collection(db, 'dish');
   const restaurantCollection = collection(db, 'restaurant');
+  const navigation = useNavigation();
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -29,6 +31,12 @@ export default function HomeScreen() {
       getReviews();
     }, [])
   );
+
+  useEffect(() => {
+    navigation.addListener('focus', () => {
+      getReviews();
+    });
+  }, []);
 
   const getReviews = async () => {
     try {
@@ -53,9 +61,6 @@ export default function HomeScreen() {
         ...doc.data(),
         id: doc.id,
       }));
-
-      console.log(filteredDishData);
-      console.log(filteredData);
 
       setProfileList(filteredProfileData);
       setDishList(filteredDishData);
@@ -87,9 +92,7 @@ export default function HomeScreen() {
         };
       });
       
-      console.log(updatedReviewList);
       setReviewList(sortByDate(updatedReviewList));
-      console.log(reviewList);
     } catch (error) {
       console.error(error);
     }
