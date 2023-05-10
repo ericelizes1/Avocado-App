@@ -86,6 +86,7 @@ export default function ProfileScreen({ route}) {
     console.log(filteredProfileData);
     setBioText(filteredProfileData[0].bio);
     setProfileList(filteredProfileData);
+    setBioText(filteredProfileData[0].bio);
     setReviewList(sortByDate(filteredReviewData));
   }
 
@@ -192,17 +193,6 @@ export default function ProfileScreen({ route}) {
   
   const data = reviewList;
 
-  const handleSignOut = () => {
-    auth.signOut()
-    .then(() => {
-      navigation.replace("Login");
-    })
-    .catch((error) => alert(error.message)); 
-  }
-
-  const handleEditProfile = () => {
-    navigation.navigate("EditProfile");
-  }
   /*
   useEffect(() => {
     // Retrieve the user's bio from the Firebase database

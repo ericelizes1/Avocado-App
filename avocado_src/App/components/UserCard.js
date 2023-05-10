@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from '@react-navigation/native';
+import { db } from '../../firebase';
+import { Ionicons } from '@expo/vector-icons'; // import Ionicons from expo vector icons
+import { collection, getDocs, addDoc, doc, getDoc, deleteDoc } from 'firebase/firestore';
+
 
 export default function UserCard(props) {
   const navigation = useNavigation();
+  const profileCollection = collection(db, 'profile');
+  const [profileImage, setProfileImage] = useState("");
 
   const handleProfile = () => {
     navigation.navigate('OtherUserProfile', {
@@ -13,12 +19,61 @@ export default function UserCard(props) {
       email: props.email,
       photo : props.photo,
     });
+    
   };
+
+  useEffect(() => {
+    const getProfileImage = async () => {
+      try {
+        const profileData = await getDocs(profileCollection);
+
+        const filteredProfileData = profileData.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        })).filter((item) => item !== null && item.id === props.email);
+        setProfileList(filteredProfileData);
+
+        filteredProfileData.forEach((profile) => {
+
+          //fetches the profile picture from the database
+          let xhr = new XMLHttpRequest();
+          xhr.responseType = 'text';
+          xhr.open('GET', profile.profilePic);
+          xhr.send();
+          xhr.onload = function(event) {
+            if (xhr.status != 200) {
+              // analyze HTTP status of the response
+              console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+            } else { // show the result
+              console.log(`Received ${event.loaded} bytes`);
+              setProfileImage(xhr.response);
+            }
+          };
+
+          xhr.onerror = function() {
+            console.log("Request failed");
+          };
+
+        });
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getProfileImage();
+
+  }, []);
 
   return (
     <TouchableOpacity style={styles.container} onPress={handleProfile}>
       <View style={styles.imageContainer}>
-        <Image source={props.image} style={styles.image}/>
+        {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />  
+        ) : (
+            <View style={{ backgroundColor: '#ccc', width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center' }}>
+              <Ionicons name="person-circle" size={45} color="#fff" />
+            </View>
+        )}
       </View>
       <View style={{paddingLeft: 10, }}>
         <Text style={{color: 'black', fontWeight: "bold", fontSize: 18}}>{props.name}</Text>
